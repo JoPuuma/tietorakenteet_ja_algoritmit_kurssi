@@ -60,12 +60,12 @@ public:
     Datastructures();
     ~Datastructures();
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: 1
+    // Short rationale for estimate: size-funktion toiminta on vakioaikainen
     int stop_count();
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: n
+    // Short rationale for estimate: Jokaisen alkion purkajaa kutsutaan
     void clear_all();
 
     // Estimate of performance:
@@ -167,12 +167,12 @@ private:
     struct Stop {
         StopID id_;
         Coord coord_;
-        std::string name_;
+        Name name_;
     };
 
     struct Region{
         RegionID id_;
-        std::string name_;
+        Name name_;
         std::shared_ptr<RegionID> overRegion = nullptr;
         std::vector<std::shared_ptr<RegionID>> subRegions;
     };

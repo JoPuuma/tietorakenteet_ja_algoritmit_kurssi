@@ -5,6 +5,7 @@
 #include <random>
 #include <cmath>
 #include <stdexcept>
+#include <unordered_map>
 
 std::minstd_rand rand_engine; // Reasonably quick pseudo-random generator
 
@@ -24,25 +25,26 @@ Type random_in_range(Type start, Type end)
 // an operation (Commenting out parameter name prevents compiler from
 // warning about unused parameters on operations you haven't yet implemented.)
 
-Datastructures::Datastructures()
+Datastructures::Datastructures():
+    stopsByID({})
 {
-    // Replace this comment with your implementation
+
 }
 
 Datastructures::~Datastructures()
 {
-    // Replace this comment with your implementation
+
 }
 
 int Datastructures::stop_count()
 {
-    // Replace this comment and the line below with your implementation
-    return NO_VALUE;
+    return stopsByID.size();
 }
 
 void Datastructures::clear_all()
 {
-    // Replace this comment with your implementation
+    stopsByID.clear();
+    // clear region datastructure
 }
 
 std::vector<StopID> Datastructures::all_stops()
