@@ -6,6 +6,7 @@
 #include <cmath>
 #include <stdexcept>
 #include <unordered_map>
+#include <algorithm>
 
 std::minstd_rand rand_engine; // Reasonably quick pseudo-random generator
 
@@ -49,32 +50,56 @@ void Datastructures::clear_all()
 
 std::vector<StopID> Datastructures::all_stops()
 {
-    // Replace this comment and the line below with your implementation
-    return {NO_STOP};
+    std::vector<StopID> stops = {};
+    for(auto stop : stopsByID)
+    {
+        stops.push_back(stop.first);
+    }
+    return stops;
 }
 
 bool Datastructures::add_stop(StopID id, const Name& name, Coord xy)
 {
-    // Replace this comment and the line below with your implementation
-    return false;
+    if(stopsByID.find(id) != stopsByID.end())
+    {
+        return false;
+    }
+    else
+    {
+        Stop newStop = {id, xy, name};
+        stopsByID[id] = newStop;
+        return true;
+    }
 }
 
 Name Datastructures::get_stop_name(StopID id)
 {
-    // Replace this comment and the line below with your implementation
-    return NO_NAME;
+    auto it = stopsByID.find(id);
+    if(it == stopsByID.end()) return NO_NAME;
+    else return it->second.name_;
 }
 
 Coord Datastructures::get_stop_coord(StopID id)
 {
-    // Replace this comment and the line below with your implementation
-    return NO_COORD;
+    auto it = stopsByID.find(id);
+    if(it == stopsByID.end()) return NO_COORD;
+    else return it->second.coord_;
 }
 
 std::vector<StopID> Datastructures::stops_alphabetically()
 {
-    // Replace this comment and the line below with your implementation
-    return {NO_STOP};
+    std::vector<StopID> stops = {};
+    for(const auto &stop : stopsByID)
+    {
+        stops.push_back(stop.first);
+    }
+    // sort by stop name
+    std::sort(stops.begin(),stops.end(),
+              [&](const auto& s1, const auto& s2)
+    {
+        return stopsByID[s1].name_ < stopsByID[s2].name_;
+    });
+    return stops;
 }
 
 std::vector<StopID> Datastructures::stops_coord_order()

@@ -60,33 +60,33 @@ public:
     Datastructures();
     ~Datastructures();
 
-    // Estimate of performance: 1
+    // Estimate of performance: theta(1)
     // Short rationale for estimate: size-funktion toiminta on vakioaikainen
     int stop_count();
 
-    // Estimate of performance: n
+    // Estimate of performance: O(n)
     // Short rationale for estimate: Jokaisen alkion purkajaa kutsutaan
     void clear_all();
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: Käydään läpi koko tietorakenne ja kopioidaan alkiot
     std::vector<StopID> all_stops();
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(1)
+    // Short rationale for estimate: kaikki toiminnot lineaarisia: find, pysäkin luonti ja lisäys tietorakenteeseen
     bool add_stop(StopID id, Name const& name, Coord xy);
 
-    // Estimate of performance:
+    // Estimate of performance: O(1)
     // Short rationale for estimate:
     Name get_stop_name(StopID id);
 
-    // Estimate of performance:
+    // Estimate of performance: O(1)
     // Short rationale for estimate:
     Coord get_stop_coord(StopID id);
 
     // We recommend you implement the operations below only after implementing the ones above
 
-    // Estimate of performance:
+    // Estimate of performance: O(nlog(n))
     // Short rationale for estimate:
     std::vector<StopID> stops_alphabetically();
 
