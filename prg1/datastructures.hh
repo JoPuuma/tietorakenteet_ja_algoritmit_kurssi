@@ -8,6 +8,10 @@
 #include <utility>
 #include <limits>
 
+#include <unordered_map>
+#include <set>
+#include <memory> // shared_ptr
+
 // Types for IDs
 using StopID = long int;
 using RegionID = std::string;
@@ -159,8 +163,22 @@ public:
     RegionID stops_common_region(StopID id1, StopID id2);
 
 private:
-    // Add stuff needed for your class implementation here
 
+    struct Stop {
+        StopID id_;
+        Coord coord_;
+        std::string name_;
+    };
+
+    struct Region{
+        RegionID id_;
+        std::string name_;
+        std::shared_ptr<RegionID> overRegion = nullptr;
+        std::vector<std::shared_ptr<RegionID>> subRegions;
+    };
+
+    std::unordered_map<StopID,Stop> stopsByID;
+    std::set<Region> regions;
 };
 
 #endif // DATASTRUCTURES_HH
