@@ -86,26 +86,68 @@ Coord Datastructures::get_stop_coord(StopID id)
     else return it->second.coord_;
 }
 
-std::vector<StopID> Datastructures::stops_alphabetically()
+std::vector<StopID> Datastructures::stops_alphabetically() // 200 10 000 ~ 2.5s
 {
-    std::vector<StopID> stops = {};
+    std::vector<const Stop*> stopPtrs = {};
     for(const auto &stop : stopsByID)
     {
-        stops.push_back(stop.first);
+        const Stop* ptr = &stop.second;
+        stopPtrs.push_back(ptr);
     }
     // sort by stop name
-    std::sort(stops.begin(),stops.end(),
-              [&](const auto& s1, const auto& s2)
+    std::sort(stopPtrs.begin(),stopPtrs.end(),
+              [](const auto& s1, const auto& s2)
     {
-        return stopsByID[s1].name_ < stopsByID[s2].name_;
+        return s1->name_ < s2->name_;
     });
-    return stops;
+    std::vector<StopID> ordered = {};
+    for(auto ptr : stopPtrs)
+    {
+        ordered.push_back(ptr->id_);
+    }
+
+    return ordered;
 }
+
 
 std::vector<StopID> Datastructures::stops_coord_order()
 {
-    // Replace this comment and the line below with your implementation
-    return {NO_STOP};
+
+//    // sort by stop coord
+//    std::sort(stops.begin(),stops.end(),
+//              [&](const auto& s1, const auto& s2)
+//    {
+//        Coord coord1 = stopsByID[s1].coord_;
+//        Coord coord2 = stopsByID[s2].coord_;
+//        if(coord1 != coord2){
+//            if(pow(coord1.x,2) + pow(coord1.y,2) < pow(coord2.x,2) + pow(coord2.y,2))
+//            {
+
+//            }
+//        }
+//        else {return false};
+
+//    });
+
+    std::vector<const Stop*> stopPtrs = {};
+    for(const auto &stop : stopsByID)
+    {
+        const Stop* ptr = &stop.second;
+        stopPtrs.push_back(ptr);
+    }
+    // sort by stop coordinate
+    std::sort(stopPtrs.begin(),stopPtrs.end(),
+              [](const auto& s1, const auto& s2)
+    {
+
+    });
+    std::vector<StopID> ordered = {};
+    for(auto ptr : stopPtrs)
+    {
+        ordered.push_back(ptr->id_);
+    }
+
+    return ordered;
 }
 
 StopID Datastructures::min_coord()
