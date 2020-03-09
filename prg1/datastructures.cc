@@ -113,22 +113,6 @@ std::vector<StopID> Datastructures::stops_alphabetically() // 200 10 000 ~ 2.5s
 std::vector<StopID> Datastructures::stops_coord_order()
 {
 
-//    // sort by stop coord
-//    std::sort(stops.begin(),stops.end(),
-//              [&](const auto& s1, const auto& s2)
-//    {
-//        Coord coord1 = stopsByID[s1].coord_;
-//        Coord coord2 = stopsByID[s2].coord_;
-//        if(coord1 != coord2){
-//            if(pow(coord1.x,2) + pow(coord1.y,2) < pow(coord2.x,2) + pow(coord2.y,2))
-//            {
-
-//            }
-//        }
-//        else {return false};
-
-//    });
-
     std::vector<const Stop*> stopPtrs = {};
     for(const auto &stop : stopsByID)
     {
@@ -137,9 +121,9 @@ std::vector<StopID> Datastructures::stops_coord_order()
     }
     // sort by stop coordinate
     std::sort(stopPtrs.begin(),stopPtrs.end(),
-              [](const auto& s1, const auto& s2)
+              [this](const auto& s1, const auto& s2)
     {
-
+        return isSmaller(s1->coord_,s2->coord_);
     });
     std::vector<StopID> ordered = {};
     for(auto ptr : stopPtrs)
@@ -244,4 +228,17 @@ RegionID Datastructures::stops_common_region(StopID id1, StopID id2)
 {
     // Replace this comment and the line below with your implementation
     return NO_REGION;
+}
+
+bool Datastructures::isSmaller(Coord c1, Coord c2) // return c1 < c2
+{
+    double d1 = pow(c1.x,2) + pow(c1.y,2); // testaa coord*coord
+    double d2 = pow(c2.x,2) + pow(c2.y,2);
+
+    if(d1 < d2) return true;
+    else if(d1 > d2) return false;
+    else
+    {
+        return c1.y < c2.y;
+    }
 }

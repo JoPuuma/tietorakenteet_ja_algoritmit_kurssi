@@ -179,6 +179,8 @@ private:
 
     std::unordered_map<StopID,Stop> stopsByID;
     std::set<Region> regions;
+
+    bool isSmaller(Coord c1,Coord c2); // return c1 < c2 (distance from origo)
 };
 
 #endif // DATASTRUCTURES_HH
