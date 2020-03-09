@@ -84,8 +84,6 @@ public:
     // Short rationale for estimate: find keskimäärin vakioaikainen, mutta pahimmassa tapauksessa lineaarinen
     Coord get_stop_coord(StopID id);
 
-    // We recommend you implement the operations below only after implementing the ones above
-
     // Estimate of performance: O(nlog(n))
     // Short rationale for estimate: Sort funktio on hitain (nlog(n)), mutta aikaa kuluu myös kopiointiin (n).
     std::vector<StopID> stops_alphabetically();
@@ -102,8 +100,8 @@ public:
     // Short rationale for estimate: max_element funktion ajankäyttö on lineaarinen
     StopID max_coord();
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: theta(n)
+    // Short rationale for estimate: Kaikki alkiot käydään läpi, joten aikaa kuluun n:n verran
     std::vector<StopID> find_stops(Name const& name);
 
     // Estimate of performance:
@@ -113,8 +111,6 @@ public:
     // Estimate of performance:
     // Short rationale for estimate:
     bool change_stop_coord(StopID id, Coord newcoord);
-
-    // We recommend you implement the operations below only after implementing the ones above
 
     // Estimate of performance:
     // Short rationale for estimate:
@@ -168,17 +164,18 @@ private:
         StopID id_;
         Coord coord_;
         Name name_;
+        std::shared_ptr<Region> region_ = nullptr;
     };
 
     struct Region{
         RegionID id_;
         Name name_;
-        std::shared_ptr<Region> overRegion = nullptr;
-        std::vector<std::shared_ptr<RegionID>> subRegions;
+        std::shared_ptr<Region> overRegion_ = nullptr;
+        std::vector<std::shared_ptr<RegionID>> subRegions_;
     };
 
     std::unordered_map<StopID,Stop> stopsByID;
-    std::set<Region> regions;
+    std::unorgered_map<RegionID,Region> regionsByID;
 
     bool isSmaller(Coord c1,Coord c2); // return c1 < c2 (distance from origin)
 };

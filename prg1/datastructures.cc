@@ -156,20 +156,39 @@ StopID Datastructures::max_coord()
 
 std::vector<StopID> Datastructures::find_stops(Name const& name)
 {
-    // Replace this comment and the line below with your implementation
-    return {NO_STOP};
+    std::vector<StopID> stops = {};
+    for(const auto& stop : stopsByID)
+    {
+        if(stop.second.name_ == name)
+        {
+            stops.push_back(stop.first);
+        }
+    }
+    return stops;
 }
 
 bool Datastructures::change_stop_name(StopID id, const Name& newname)
 {
-    // Replace this comment and the line below with your implementation
-    return false;
+    auto stopIt = stopsByID.find(id);
+
+    if(stopIt == stopsByID.end()) return false;
+    else
+    {
+        stopIt->second.name_ = newname;
+        return true;
+    }
 }
 
 bool Datastructures::change_stop_coord(StopID id, Coord newcoord)
 {
-    // Replace this comment and the line below with your implementation
-    return false;
+    auto stopIt = stopsByID.find(id);
+
+    if(stopIt == stopsByID.end()) return false;
+    else
+    {
+        stopIt->second.coord_ = newcoord;
+        return true;
+    }
 }
 
 bool Datastructures::add_region(RegionID id, const Name &name)
