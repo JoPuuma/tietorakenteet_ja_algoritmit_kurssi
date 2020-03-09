@@ -76,30 +76,30 @@ public:
     // Short rationale for estimate: kaikki toiminnot lineaarisia: find, pysäkin luonti ja lisäys tietorakenteeseen
     bool add_stop(StopID id, Name const& name, Coord xy);
 
-    // Estimate of performance: O(n), average theta(1)
+    // Estimate of performance: O(n), keskimäärin theta(1)
     // Short rationale for estimate: find keskimäärin vakioaikainen, mutta pahimmassa tapauksessa lineaarinen
     Name get_stop_name(StopID id);
 
-    // Estimate of performance: O(n), average theta(1)
+    // Estimate of performance: O(n), keskimäärin theta(1)
     // Short rationale for estimate: find keskimäärin vakioaikainen, mutta pahimmassa tapauksessa lineaarinen
     Coord get_stop_coord(StopID id);
 
     // We recommend you implement the operations below only after implementing the ones above
 
     // Estimate of performance: O(nlog(n))
-    // Short rationale for estimate:
+    // Short rationale for estimate: Sort funktio on hitain (nlog(n)), mutta aikaa kuluu myös kopiointiin (n).
     std::vector<StopID> stops_alphabetically();
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(nlog(n))
+    // Short rationale for estimate: Sort funktio on hitain (nlog(n)), mutta aikaa kuluu myös kopiointiin (n).
     std::vector<StopID> stops_coord_order();
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: theta(n)
+    // Short rationale for estimate: min_element funktion ajankäyttö on lineaarinen
     StopID min_coord();
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: theta(n)
+    // Short rationale for estimate: max_element funktion ajankäyttö on lineaarinen
     StopID max_coord();
 
     // Estimate of performance:
@@ -180,7 +180,7 @@ private:
     std::unordered_map<StopID,Stop> stopsByID;
     std::set<Region> regions;
 
-    bool isSmaller(Coord c1,Coord c2); // return c1 < c2 (distance from origo)
+    bool isSmaller(Coord c1,Coord c2); // return c1 < c2 (distance from origin)
 };
 
 #endif // DATASTRUCTURES_HH

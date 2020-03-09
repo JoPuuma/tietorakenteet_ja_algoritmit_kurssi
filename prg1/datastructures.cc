@@ -134,16 +134,24 @@ std::vector<StopID> Datastructures::stops_coord_order()
     return ordered;
 }
 
-StopID Datastructures::min_coord()
+StopID Datastructures::min_coord() // 200 100000 2.5s
 {
-    // Replace this comment and the line below with your implementation
-    return NO_STOP;
+    if(stop_count() == 0) return NO_STOP;
+    auto it = std::min_element(stopsByID.begin(),stopsByID.end(),[this](const auto& s1, const auto& s2)
+    {
+        return isSmaller(s1.second.coord_,s2.second.coord_);
+    });
+    return it->first;
 }
 
 StopID Datastructures::max_coord()
 {
-    // Replace this comment and the line below with your implementation
-    return NO_STOP;
+    if(stop_count() == 0) return NO_STOP;
+    auto it = std::max_element(stopsByID.begin(),stopsByID.end(),[this](const auto& s1, const auto& s2)
+    {
+        return isSmaller(s1.second.coord_,s2.second.coord_);
+    });
+    return it->first;
 }
 
 std::vector<StopID> Datastructures::find_stops(Name const& name)
