@@ -45,7 +45,7 @@ int Datastructures::stop_count()
 void Datastructures::clear_all()
 {
     stopsByID.clear();
-    // clear region datastructure
+    regionsByID.clear();
 }
 
 std::vector<StopID> Datastructures::all_stops()
@@ -227,7 +227,7 @@ bool Datastructures::add_stop_to_region(StopID id, RegionID parentid)
     if(stopIt == stopsByID.end() || regionIt == regionsByID.end()) return false;
     if(stopIt->second.region_ != nullptr) return false;
 
-    *stopIt->second.region_ = regionIt->second;
+    stopIt->second.region_ = &regionIt->second;
     return true;
 }
 
@@ -250,8 +250,16 @@ bool Datastructures::add_subregion_to_region(RegionID id, RegionID parentid)
 
 std::vector<RegionID> Datastructures::stop_regions(StopID id)
 {
-    // Replace this comment and the line below with your implementation
-    return {NO_REGION};
+    std::vector<RegionID> regions = {};
+    auto stop = stopsByID.find(id);
+
+    if(stop == stopsByID.end())
+    {
+        regions.push_back(NO_REGION);
+        return regions;
+    }
+    getRegions(regions, stop->second.region_);
+    return regions;
 }
 
 void Datastructures::creation_finished()
@@ -286,8 +294,8 @@ RegionID Datastructures::stops_common_region(StopID id1, StopID id2)
 
 bool Datastructures::isSmaller(Coord c1, Coord c2) // return c1 < c2
 {
-    double d1 = pow(c1.x,2) + pow(c1.y,2); // testaa coord*coord
-    double d2 = pow(c2.x,2) + pow(c2.y,2);
+    double d1 = c1.x * c1.x + c1.y * c1.y;
+    double d2 = c2.x * c2.x + c2.y * c2.y;
 
     if(d1 < d2) return true;
     else if(d1 > d2) return false;
@@ -296,3 +304,22 @@ bool Datastructures::isSmaller(Coord c1, Coord c2) // return c1 < c2
         return c1.y < c2.y;
     }
 }
+
+void Datastructures::getRegions(std::vector<RegionID> &regions, Datastructures::Region* overRegionPtr)
+{
+    if(overRegionPtr == nullptr) return;
+
+    RegionID id = overRegionPtr->id_;
+    if(overRegionPtr->overRegion_ == nullptr)
+    {
+        regions.push_back(id);
+        return;
+    }
+    else
+    {
+        regions.push_back(id);
+        getRegions(regions, overRegionPtr->overRegion_);
+    }
+}
+
+

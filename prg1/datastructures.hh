@@ -183,6 +183,7 @@ private:
     std::unordered_map<RegionID,Region> regionsByID;
 
     bool isSmaller(Coord c1,Coord c2); // return c1 < c2 (distance from origin)
+    void getRegions(std::vector<RegionID>& regions, Region* overRegionPtr);
 };
 
 #endif // DATASTRUCTURES_HH
