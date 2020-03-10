@@ -239,10 +239,11 @@ bool Datastructures::add_subregion_to_region(RegionID id, RegionID parentid)
     if(subIt == regionsByID.end() || parentIt == regionsByID.end()) return false;
 
     Region* subRegion = &subIt->second;
-    if(subRegion->overRegion_ != nullptr) return false;
+    if(subRegion->overRegion_ != nullptr) return false; // have already overregion
 
     Region* parentRegion = &parentIt->second;
 
+    // add regions to datastructure elements
     subRegion->overRegion_ = parentRegion;
     parentRegion->subRegions_.push_back(subRegion);
     return true;

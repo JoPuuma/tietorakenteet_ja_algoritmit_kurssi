@@ -116,8 +116,9 @@ public:
     //                               Muut toiminnot eivät kuluta lähes yhtään aikaa.
     bool change_stop_coord(StopID id, Coord newcoord);
 
-    // Estimate of performance: theta
-    // Short rationale for estimate:
+    // Estimate of performance: O(n) keskimäärin theta(1)
+    // Short rationale for estimate: find-funktio on keskimäärin vakioaikainen, muuta pahimmillaan lineaarinen.
+    //                               Alkion luonti ja lisäys ei vaikuta paljon aikaan.
     bool add_region(RegionID id, Name const& name);
 
     // Estimate of performance: O(n), keskimäärin theta(1)
@@ -128,16 +129,18 @@ public:
     // Short rationale for estimate: kaikki alkiot käydään läpi ja kopioidaan vectoriin.
     std::vector<RegionID> all_regions();
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: kaksi find-funktiota kuluttavat aikaa keskimäärin vakioaikaisesti, mutta voivat olla lineaarisiakin.
+    //                               Ei kuitenkaan huonompia. Muut toiminnot eivät kuluta paljon aikaa.
     bool add_stop_to_region(StopID id, RegionID parentid);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Short rationale for estimate: kaksi find-funktiota kuluttavat aikaa keskimäärin vakioaikaisesti, mutta voivat olla lineaarisiakin.
+    //                               Ei kuitenkaan huonompia. Muut toiminnot eivät kuluta paljon aikaa.
     bool add_subregion_to_region(RegionID id, RegionID parentid);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: theta(n)
+    // Short rationale for estimate: find on huonoimmassa tapauksesa lineaarinen.
+    // Lisäksi alueet käydäään rekursiivisesti läpi, kunnes ne loppuvat, joten alueiden haku on myös lineaarinen.
     std::vector<RegionID> stop_regions(StopID id);
 
     // Non-compulsory operations
