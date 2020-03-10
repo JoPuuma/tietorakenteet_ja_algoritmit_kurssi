@@ -68,12 +68,12 @@ public:
     // Short rationale for estimate: Jokaisen alkion purkajaa kutsutaan
     void clear_all();
 
-    // Estimate of performance: O(n)
+    // Estimate of performance: theta(n)
     // Short rationale for estimate: Käydään läpi koko tietorakenne ja kopioidaan alkiot
     std::vector<StopID> all_stops();
 
-    // Estimate of performance: theta(1)
-    // Short rationale for estimate: kaikki toiminnot lineaarisia: find, pysäkin luonti ja lisäys tietorakenteeseen
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: Pysäkin luonti ja lisäys tietorakenteeseen vakioaikaisia. Find on lineaarinen.
     bool add_stop(StopID id, Name const& name, Coord xy);
 
     // Estimate of performance: O(n), keskimäärin theta(1)
@@ -93,35 +93,39 @@ public:
     std::vector<StopID> stops_coord_order();
 
     // Estimate of performance: theta(n)
-    // Short rationale for estimate: min_element funktion ajankäyttö on lineaarinen
+    // Short rationale for estimate: min_element funktion ajankäyttö on lineaarinen.
+    //                               Vertailuoperaatio lisää absoluutista aikaa.
     StopID min_coord();
 
     // Estimate of performance: theta(n)
-    // Short rationale for estimate: max_element funktion ajankäyttö on lineaarinen
+    // Short rationale for estimate: max_element funktion ajankäyttö on lineaarinen.
+    //                               Vertailuoperaatio lisää absoluutista aikaa.
     StopID max_coord();
 
     // Estimate of performance: theta(n)
     // Short rationale for estimate: Kaikki alkiot käydään läpi, joten aikaa kuluun n:n verran
     std::vector<StopID> find_stops(Name const& name);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: Aikaa kuluu etsimiseen find-funktioilla maksimissaan n:n verran.
+    //                               Muut toiminnot eivät kuluta lähes yhtään aikaa.
     bool change_stop_name(StopID id, Name const& newname);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: Aikaa kuluu etsimiseen find-funktioilla maksimissaan n:n verran.
+    //                               Muut toiminnot eivät kuluta lähes yhtään aikaa.
     bool change_stop_coord(StopID id, Coord newcoord);
 
-    // Estimate of performance:
+    // Estimate of performance: theta
     // Short rationale for estimate:
     bool add_region(RegionID id, Name const& name);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n), keskimäärin theta(1)
+    // Short rationale for estimate: Find-funktio on huonoimmassa tapauksessa lineaarinen, mutta keskimäärin vakioaikainen.
     Name get_region_name(RegionID id);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: theta(n)
+    // Short rationale for estimate: kaikki alkiot käydään läpi ja kopioidaan vectoriin.
     std::vector<RegionID> all_regions();
 
     // Estimate of performance:
@@ -160,22 +164,23 @@ public:
 
 private:
 
+    struct Region{
+        RegionID id_;
+        Name name_;
+        Region* overRegion_ = nullptr;
+        std::vector<Region*> subRegions_;
+    };
+
     struct Stop {
         StopID id_;
         Coord coord_;
         Name name_;
-        std::shared_ptr<Region> region_ = nullptr;
+        Region* region_ = nullptr;
     };
 
-    struct Region{
-        RegionID id_;
-        Name name_;
-        std::shared_ptr<Region> overRegion_ = nullptr;
-        std::vector<std::shared_ptr<RegionID>> subRegions_;
-    };
 
     std::unordered_map<StopID,Stop> stopsByID;
-    std::unorgered_map<RegionID,Region> regionsByID;
+    std::unordered_map<RegionID,Region> regionsByID;
 
     bool isSmaller(Coord c1,Coord c2); // return c1 < c2 (distance from origin)
 };

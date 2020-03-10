@@ -51,7 +51,7 @@ void Datastructures::clear_all()
 std::vector<StopID> Datastructures::all_stops()
 {
     std::vector<StopID> stops = {};
-    for(auto stop : stopsByID)
+    for(auto& stop : stopsByID)
     {
         stops.push_back(stop.first);
     }
@@ -193,32 +193,60 @@ bool Datastructures::change_stop_coord(StopID id, Coord newcoord)
 
 bool Datastructures::add_region(RegionID id, const Name &name)
 {
-    // Replace this comment and the line below with your implementation
-    return false;
+    if(regionsByID.find(id) == regionsByID.end())
+    {
+        Region newRegion = {id, name, nullptr, {}};
+        regionsByID[id] = newRegion;
+        return true;
+    }
+    else return false;
 }
 
 Name Datastructures::get_region_name(RegionID id)
 {
-    // Replace this comment and the line below with your implementation
-    return NO_NAME;
+    auto it = regionsByID.find(id);
+    if(it == regionsByID.end()) return NO_NAME;
+    else return it->second.name_;
 }
 
 std::vector<RegionID> Datastructures::all_regions()
 {
-    // Replace this comment and the line below with your implementation
-    return {NO_REGION};
+    std::vector<RegionID> regions = {};
+    for(auto& region : regionsByID)
+    {
+        regions.push_back(region.first);
+    }
+    return regions;
 }
 
 bool Datastructures::add_stop_to_region(StopID id, RegionID parentid)
 {
-    // Replace this comment and the line below with your implementation
-    return false;
+    auto stopIt = stopsByID.find(id);
+    auto regionIt = regionsByID.find(parentid);
+
+    if(stopIt == stopsByID.end() || regionIt == regionsByID.end()) return false;
+    if(stopIt->second.region_ != nullptr) return false;
+
+    *stopIt->second.region_ = regionIt->second;
+    return true;
 }
 
 bool Datastructures::add_subregion_to_region(RegionID id, RegionID parentid)
 {
-    // Replace this comment and the line below with your implementation
-    return false;
+    auto subIt = regionsByID.find(id);
+    auto parentIt = regionsByID.find(parentid);
+
+    if(subIt == regionsByID.end() || parentIt == regionsByID.end()) return false;
+
+    Region* overRegionPtr = subIt->second.overRegion_;
+    if(overRegionPtr != nullptr) return false;
+
+    Region parentRegion = parentIt->second;
+
+    overRegionPtr = &parentRegion;
+    Region* subRegion = &subIt->second;
+    parentRegion.subRegions_.push_back(subRegion);
+    return true;
 }
 
 std::vector<RegionID> Datastructures::stop_regions(StopID id)
