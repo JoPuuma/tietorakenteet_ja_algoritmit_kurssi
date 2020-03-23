@@ -239,9 +239,14 @@ bool Datastructures::add_subregion_to_region(RegionID id, RegionID parentid)
     if(subIt == regionsByID.end() || parentIt == regionsByID.end()) return false;
 
     Region* subRegion = &subIt->second;
-    if(subRegion->overRegion_ != nullptr) return false; // have already overregion
+    if(subRegion->overRegion_ != nullptr) return false; // has already overregion
 
     Region* parentRegion = &parentIt->second;
+    Region* parentOverRegion = parentRegion->overRegion_;
+    if(parentOverRegion != nullptr)
+    {
+        if( parentOverRegion->id_ == subRegion->id_) return false; // cannot make loop between regions
+    }
 
     // add regions to datastructure elements
     subRegion->overRegion_ = parentRegion;
@@ -302,7 +307,7 @@ bool Datastructures::isSmaller(Coord c1, Coord c2) // return c1 < c2
     else if(d1 > d2) return false;
     else
     {
-        return c1.y < c2.y;
+        return c1.y < c2.y; // if same distance return value according y-coordinate
     }
 }
 
