@@ -10,6 +10,7 @@
 
 #include <unordered_map>
 #include <set>
+#include <map>
 #include <memory> // shared_ptr
 
 // Types for IDs
@@ -39,13 +40,18 @@ struct Coord
 inline bool operator==(Coord c1, Coord c2) { return c1.x == c2.x && c1.y == c2.y; }
 inline bool operator!=(Coord c1, Coord c2) { return !(c1==c2); } // Not strictly necessary
 
-// Example: Defining < for Coord so that it can be used
-// as key for std::map/set
-inline bool operator<(Coord c1, Coord c2)
+
+inline bool operator<(Coord c1, Coord c2) // return c1 < c2 (distance from origin)
 {
-    if (c1.y < c2.y) { return true; }
-    else if (c2.y < c1.y) { return false; }
-    else { return c1.x < c2.x; }
+    double d1 = c1.x * c1.x + c1.y * c1.y;
+    double d2 = c2.x * c2.x + c2.y * c2.y;
+
+    if(d1 < d2) return true;
+    else if(d1 > d2) return false;
+    else
+    {
+        return c1.y < c2.y; // if same distance return value according y-coordinate
+    }
 }
 
 // Return value for cases where coordinates were not found
@@ -182,10 +188,25 @@ private:
     };
 
 
-    std::unordered_map<StopID,Stop> stopsByID;
+    std::unordered_map<StopID,std::shared_ptr<Stop>> stopsByID;
     std::unordered_map<RegionID,Region> regionsByID;
+    std::map<Coord, Stop*> stopCoords; // Järjestyksessä koordinaatin mukaan
+    std::multimap<std::string,Stop*> stopsByName;
 
-    bool isSmaller(Coord c1,Coord c2); // return c1 < c2 (distance from origin)
+    ///
+    /// \brief isSmaller vertailee kahta koordinaattia.
+    ///         Ensin verrataan y-koordinaattia ja jos ne ovat samat, verrataan x-koordinaattia.
+    /// \param c1
+    /// \param c2
+    /// \return (c1 < c2) yllä mainituin ehdoin.
+    ///
+    bool isSmaller(Coord c1,Coord c2);
+
+    ///
+    /// \brief getRegions
+    /// \param regions
+    /// \param overRegionPtr
+    ///
     void getRegions(std::vector<RegionID>& regions, Region* overRegionPtr);
 };
 
