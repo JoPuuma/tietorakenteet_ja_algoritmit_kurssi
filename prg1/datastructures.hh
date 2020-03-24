@@ -79,7 +79,8 @@ public:
     std::vector<StopID> all_stops();
 
     // Estimate of performance: O(n)
-    // Short rationale for estimate: Pysäkin luonti ja lisäys tietorakenteeseen vakioaikaisia. Find on lineaarinen.
+    // Short rationale for estimate: Pysäkin luonti ja lisäys tietorakenteeseen vakioaikaisia. Find on pahimmassa tapauksessa lineaarinen,
+    // mutta se toteutuu vain silloin, kun yritetään lisätä olemassa olevalla id:llä uutta pysäkkiä. Keskimäärin siis vakioaikainen suoritus.
     bool add_stop(StopID id, Name const& name, Coord xy);
 
     // Estimate of performance: O(n), keskimäärin theta(1)
@@ -90,26 +91,26 @@ public:
     // Short rationale for estimate: find keskimäärin vakioaikainen, mutta pahimmassa tapauksessa lineaarinen
     Coord get_stop_coord(StopID id);
 
-    // Estimate of performance: O(nlog(n))
-    // Short rationale for estimate: Sort funktio on hitain (nlog(n)), mutta aikaa kuluu myös kopiointiin (n).
+    // Estimate of performance: theta(n)
+    // Short rationale for estimate: Pysäkit käydään kertaalleen läpi ja kopioidaan.
     std::vector<StopID> stops_alphabetically();
 
-    // Estimate of performance: O(nlog(n))
-    // Short rationale for estimate: Sort funktio on hitain (nlog(n)), mutta aikaa kuluu myös kopiointiin (n).
+    // Estimate of performance: theta(n)
+    // Short rationale for estimate: Pysäkit käydään kertaalleen läpi ja kopioidaan.
     std::vector<StopID> stops_coord_order();
 
-    // Estimate of performance: theta(n)
-    // Short rationale for estimate: min_element funktion ajankäyttö on lineaarinen.
-    //                               Vertailuoperaatio lisää absoluutista aikaa.
+    // Estimate of performance: theta(1)
+    // Short rationale for estimate: Suoritus vakioaikainen, koska mapista otetaan vain ensimmäinen alkio ja palautetaan se.
     StopID min_coord();
 
-    // Estimate of performance: theta(n)
-    // Short rationale for estimate: max_element funktion ajankäyttö on lineaarinen.
-    //                               Vertailuoperaatio lisää absoluutista aikaa.
+    // Estimate of performance: theta(1)
+    // Short rationale for estimate: Suoritus vakioaikainen, koska mapista otetaan vain ensimmäinen alkio ja palautetaan se.
     StopID max_coord();
 
-    // Estimate of performance: theta(n)
-    // Short rationale for estimate: Kaikki alkiot käydään läpi, joten aikaa kuluun n:n verran
+    // Estimate of performance: O(nlog(n)), keskimäärin theta(log(n))
+    // Short rationale for estimate: equal_range on logaritminen joten vähintään aikaa kuluu log(n) verran. Pahimmassa tapauksessa kopioidaan
+    //                               koko tietorakenteen StopID:t, jolloin aikaa kuluu lisäksi n:n verran. Oletuksena on, ettei useita saman nimisiä
+    //                               pysäkkejä ole montaa, jolloin kopiointi on vakioaikaista.
     std::vector<StopID> find_stops(Name const& name);
 
     // Estimate of performance: O(n)
@@ -117,14 +118,15 @@ public:
     //                               Muut toiminnot eivät kuluta lähes yhtään aikaa.
     bool change_stop_name(StopID id, Name const& newname);
 
-    // Estimate of performance: O(n)
-    // Short rationale for estimate: Aikaa kuluu etsimiseen find-funktioilla maksimissaan n:n verran.
-    //                               Muut toiminnot eivät kuluta lähes yhtään aikaa.
-    bool change_stop_coord(StopID id, Coord newcoord);
+    // Estimate of performance: O(n), keskimäärin theta(1)
+    // Short rationale for estimate: Aikaa kuluu etsimiseen find-funktioilla maksimissaan n:n verran, yleensä vähemmän.
+    //                               Oletetaan, ettei pysäkin koordinaatteja tarvitse muuttaa usein, sen takia kuluu hieman enemmän aikaa,
+    //                               jotta muut haut olisivat nopeampia
+    bool change_stop_coord(StopID id, Coord newcoord);////HUOM pitää lisätä koordinaattien muutokset dataan.
 
     // Estimate of performance: O(n) keskimäärin theta(1)
     // Short rationale for estimate: find-funktio on keskimäärin vakioaikainen, muuta pahimmillaan lineaarinen.
-    //                               Alkion luonti ja lisäys ei vaikuta paljon aikaan.
+    //                               Olion luonti ja lisäys ei vaikuta paljon aikaan.
     bool add_region(RegionID id, Name const& name);
 
     // Estimate of performance: O(n), keskimäärin theta(1)
@@ -140,13 +142,16 @@ public:
     //                               Ei kuitenkaan huonompia. Muut toiminnot eivät kuluta paljon aikaa.
     bool add_stop_to_region(StopID id, RegionID parentid);
 
+    // Estimate of performance: O(n)
     // Short rationale for estimate: kaksi find-funktiota kuluttavat aikaa keskimäärin vakioaikaisesti, mutta voivat olla lineaarisiakin.
     //                               Ei kuitenkaan huonompia. Muut toiminnot eivät kuluta paljon aikaa.
     bool add_subregion_to_region(RegionID id, RegionID parentid);
 
-    // Estimate of performance: theta(n)
+    // Estimate of performance: O(n), keskimäärin theta(1)
     // Short rationale for estimate: find on huonoimmassa tapauksesa lineaarinen.
-    // Lisäksi alueet käydäään rekursiivisesti läpi, kunnes ne loppuvat, joten alueiden haku on myös lineaarinen.
+    // Lisäksi alueet käydäään rekursiivisesti läpi, kunnes ne loppuvat,
+    // joten alueiden haku on myös lineaarinen pysäkin alueiden määrän verran.
+    // Tässä on oletettu, että alueitä ei ole paljon, jolloin haku on vakioaikainen.
     std::vector<RegionID> stop_regions(StopID id);
 
     // Non-compulsory operations
@@ -172,12 +177,16 @@ public:
     RegionID stops_common_region(StopID id1, StopID id2);
 
 private:
+    struct Stop;
 
     struct Region{
         RegionID id_;
         Name name_;
         Region* overRegion_ = nullptr;
         std::vector<Region*> subRegions_;
+        std::multimap<Coord,Stop*> stops_;
+        std::pair<Coord,Coord> minMax;
+        bool minMaxIsValid;
     };
 
     struct Stop {
@@ -190,7 +199,7 @@ private:
 
     std::unordered_map<StopID,std::shared_ptr<Stop>> stopsByID;
     std::unordered_map<RegionID,Region> regionsByID;
-    std::map<Coord, Stop*> stopCoords; // Järjestyksessä koordinaatin mukaan
+    std::multimap<Coord, Stop*> stopCoords; // Järjestyksessä koordinaatin mukaan
     std::multimap<std::string,Stop*> stopsByName;
 
     ///
@@ -208,6 +217,10 @@ private:
     /// \param overRegionPtr
     ///
     void getRegions(std::vector<RegionID>& regions, Region* overRegionPtr);
+
+    void getMinMaxCoords(Coord& min, Coord& max, Region* regionPtr);
+
+    void updateRegionMinMax(Region* regionPtr);
 };
 
 #endif // DATASTRUCTURES_HH

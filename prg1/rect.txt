@@ -1,0 +1,14 @@
+add_stop 123 qwer (40,21)
+add_stop 456 asdf (50,80)
+add_stop 789 asdf (78,10)
+add_stop 012 asdf (20,10)
+add_region 111 eka
+add_region 222 toka
+add_region 333 kolm
+add_subregion_to_region 111 222
+add_subregion_to_region 222 333
+add_stop_to_region 123 111
+add_stop_to_region 456 222
+add_stop_to_region 789 333
+add_stop_to_region 012 333
+

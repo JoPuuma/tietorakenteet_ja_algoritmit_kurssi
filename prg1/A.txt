@@ -1,0 +1,2 @@
+read "Tre-A-stops.txt"
+read "Tre-A-regions.txt"
