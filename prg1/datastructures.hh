@@ -160,16 +160,22 @@ public:
     // Short rationale for estimate:
     void creation_finished();
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: Pysäkin hakuun kuluu maksimissaan lineaarinen määrä aikaa, mutta keskimäärin vakioaikaisesti.
+    //  Ajankäyttö riippuu vahvasti siitä, ovatko alueiden tallennetut min ja max koordinaatit voimassa. Ohjelma ei päivitä automaattisesti
+    //  alueen reunakoordinaatteja, kun koordinaatit muuttuvat alueen sisäissä pysäkeissä. Parhaimmassa tapauksessa käydään ainoastaan läpi
+    //  alueen alialueet lineaarisesti. Pahimmassa tapauksessa yhdenkään alueen reunakoordinaatteja ei olla määritetty valmiiksi.
     std::pair<Coord, Coord> region_bounding_box(RegionID id);
 
     // Estimate of performance:
     // Short rationale for estimate:
     std::vector<StopID> stops_closest_to(StopID id);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n)
+    // Short rationale for estimate: pysäkin etsinnässä tehdään pahimmassa tapauksessa lineaarnen haku.
+    //  Yleensä kuitenkin lyhyempi aika. Equal_rangen ajankäyttö on log(n) ja se tehdään kahdesti. Lisäksi
+    //  jos poistettavalla pysäkillä on alue, käydään läpi myös lineaarisesti kaikki alueeseen jäljelle jääneet
+    //  pysäkit min ja max koordinaattien määrittämiseksi. Oletetaan kuitenkin, että metodia ei kutsuta useasti.
     bool remove_stop(StopID id);
 
     // Estimate of performance:

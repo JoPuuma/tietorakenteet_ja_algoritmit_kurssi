@@ -144,11 +144,25 @@ bool Datastructures::change_stop_name(StopID id, const Name& newname)
     auto stopIt = stopsByID.find(id);
 
     if(stopIt == stopsByID.end()) return false;
-    else
+//    else
+//    {
+//        stopIt->second->name_ = newname;
+//    }
+    // stopsByName
+    Stop* stopPtr = &(*stopIt->second);
+    std::pair <std::multimap<std::string,Stop*>::iterator, std::multimap<std::string,Stop*>::iterator> nameRet;
+    nameRet = stopsByName.equal_range(stopIt->second->name_);
+    for (std::multimap<std::string,Stop*>::iterator it=nameRet.first; it!=nameRet.second; ++it)
     {
-        stopIt->second->name_ = newname;
-        return true;
+        if(it->second->id_ == id)
+        {
+            stopsByName.erase(it);
+            stopsByName.insert(std::make_pair(newname, stopPtr));
+            break;
+        }
     }
+    stopIt->second->name_ = newname;
+    return true;
 }
 
 bool Datastructures::change_stop_coord(StopID id, Coord newcoord)
@@ -307,12 +321,17 @@ bool Datastructures::remove_stop(StopID id)
     Stop* stopPtr = &(*stopIt->second);
     Coord* coord = &stopPtr->coord_;
     std::pair <std::multimap<Coord,Stop*>::iterator, std::multimap<Coord,Stop*>::iterator> ret;
+    std::pair <std::multimap<std::string,Stop*>::iterator, std::multimap<std::string,Stop*>::iterator> nameRet;
 
     // stopsByName
-    auto nameIt = stopsByName.find(stopIt->second->name_);
-    if(nameIt != stopsByName.end())
+    nameRet = stopsByName.equal_range(stopIt->second->name_);
+    for (std::multimap<std::string,Stop*>::iterator it=nameRet.first; it!=nameRet.second; ++it)
     {
-        stopsByName.erase(nameIt);
+        if(it->second->id_ == id)
+        {
+            stopsByName.erase(it);
+            break;
+        }
     }
     // stopCoords
     ret = stopCoords.equal_range(*coord);
@@ -389,7 +408,7 @@ void Datastructures::getMinMaxCoords(Coord &min, Coord &max, Datastructures::Reg
     {
         if(!(regionPtr->minMaxIsValid))
         {
-            updateRegionMinMax(regionPtr);
+            updateRegionMinMax(regionPtr); // theta(n)
         }
         Coord* regionMin = &(regionPtr->minMax.first);
         Coord* regionMax = &(regionPtr->minMax.second);
