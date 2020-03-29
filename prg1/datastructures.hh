@@ -193,7 +193,6 @@ private:
         std::multimap<Coord,Stop*> stops_;
         std::pair<Coord,Coord> minMax;
         bool minMaxIsValid;
-        unsigned int level_;
     };
 
     struct Stop {

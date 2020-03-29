@@ -21,10 +21,6 @@ Type random_in_range(Type start, Type end)
     return static_cast<Type>(start+num);
 }
 
-// Modify the code below to implement the functionality of the class.
-// Also remove comments from the parameter names when you implement
-// an operation (Commenting out parameter name prevents compiler from
-// warning about unused parameters on operations you haven't yet implemented.)
 
 Datastructures::Datastructures():
     stopsByID({})
