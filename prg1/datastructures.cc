@@ -142,12 +142,7 @@ std::vector<StopID> Datastructures::find_stops(Name const& name)
 bool Datastructures::change_stop_name(StopID id, const Name& newname)
 {
     auto stopIt = stopsByID.find(id);
-
     if(stopIt == stopsByID.end()) return false;
-//    else
-//    {
-//        stopIt->second->name_ = newname;
-//    }
     // stopsByName
     Stop* stopPtr = &(*stopIt->second);
     std::pair <std::multimap<std::string,Stop*>::iterator, std::multimap<std::string,Stop*>::iterator> nameRet;
@@ -161,6 +156,7 @@ bool Datastructures::change_stop_name(StopID id, const Name& newname)
             break;
         }
     }
+    // stops object itself
     stopIt->second->name_ = newname;
     return true;
 }
@@ -293,8 +289,7 @@ std::vector<RegionID> Datastructures::stop_regions(StopID id)
 
 void Datastructures::creation_finished()
 {
-    // Replace this comment with your implementation
-    // You don't have to use this method for anything, if you don't need it
+
 }
 
 std::pair<Coord,Coord> Datastructures::region_bounding_box(RegionID id)
@@ -366,18 +361,12 @@ bool Datastructures::remove_stop(StopID id)
 
 RegionID Datastructures::stops_common_region(StopID id1, StopID id2)
 {
-    (void)id1;
-    (void)id2;
-    // Replace this comment and the line below with your implementation
+    auto it1 = stopsByID.find(id1);
+    auto it2 = stopsByID.find(id2);
+    if(it1 == stopsByID.end() || it2 == stopsByID.end()) return NO_REGION;
     return NO_REGION;
 }
 
-bool Datastructures::isSmaller(Coord c1, Coord c2)
-{
-        if (c1.y < c2.y) { return true; }
-        else if (c2.y < c1.y) { return false; }
-        else { return c1.x < c2.x; }
-}
 
 void Datastructures::getRegions(std::vector<RegionID> &regions, Datastructures::Region* overRegionPtr)
 {

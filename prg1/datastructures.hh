@@ -58,8 +58,6 @@ inline bool operator<(Coord c1, Coord c2) // return c1 < c2 (distance from origi
 Coord const NO_COORD = {NO_VALUE, NO_VALUE};
 
 
-// This is the class you are supposed to implement
-
 class Datastructures
 {
 public:
@@ -78,7 +76,7 @@ public:
     // Short rationale for estimate: Käydään läpi koko tietorakenne ja kopioidaan alkiot
     std::vector<StopID> all_stops();
 
-    // Estimate of performance: O(n)
+    // Estimate of performance: O(n), keskimäärin theta(1)
     // Short rationale for estimate: Pysäkin luonti ja lisäys tietorakenteeseen vakioaikaisia. Find on pahimmassa tapauksessa lineaarinen,
     // mutta se toteutuu vain silloin, kun yritetään lisätä olemassa olevalla id:llä uutta pysäkkiä. Keskimäärin siis vakioaikainen suoritus.
     bool add_stop(StopID id, Name const& name, Coord xy);
@@ -104,12 +102,12 @@ public:
     StopID min_coord();
 
     // Estimate of performance: theta(1)
-    // Short rationale for estimate: Suoritus vakioaikainen, koska mapista otetaan vain ensimmäinen alkio ja palautetaan se.
+    // Short rationale for estimate: Suoritus vakioaikainen, koska mapista otetaan vain viimeinen alkio ja palautetaan se.
     StopID max_coord();
 
-    // Estimate of performance: O(nlog(n)), keskimäärin theta(log(n))
+    // Estimate of performance: O(n), keskimäärin theta(log(n))
     // Short rationale for estimate: equal_range on logaritminen joten vähintään aikaa kuluu log(n) verran. Pahimmassa tapauksessa kopioidaan
-    //                               koko tietorakenteen StopID:t, jolloin aikaa kuluu lisäksi n:n verran. Oletuksena on, ettei useita saman nimisiä
+    //                               koko tietorakenteen StopID:t, jolloin aikaa kuluu n:n verran. Oletuksena on, ettei useita saman nimisiä
     //                               pysäkkejä ole montaa, jolloin kopiointi on vakioaikaista.
     std::vector<StopID> find_stops(Name const& name);
 
@@ -118,11 +116,12 @@ public:
     //                               Muut toiminnot eivät kuluta lähes yhtään aikaa.
     bool change_stop_name(StopID id, Name const& newname);
 
-    // Estimate of performance: O(n), keskimäärin theta(1)
+    // Estimate of performance: O(n), keskimäärin theta(log(n))
     // Short rationale for estimate: Aikaa kuluu etsimiseen find-funktioilla maksimissaan n:n verran, yleensä vähemmän.
+    //                               equal_range käyttää log(n):n verran aikaa.
     //                               Oletetaan, ettei pysäkin koordinaatteja tarvitse muuttaa usein, sen takia kuluu hieman enemmän aikaa,
     //                               jotta muut haut olisivat nopeampia
-    bool change_stop_coord(StopID id, Coord newcoord);////HUOM pitää lisätä koordinaattien muutokset dataan.
+    bool change_stop_coord(StopID id, Coord newcoord);
 
     // Estimate of performance: O(n) keskimäärin theta(1)
     // Short rationale for estimate: find-funktio on keskimäärin vakioaikainen, muuta pahimmillaan lineaarinen.
@@ -149,9 +148,9 @@ public:
 
     // Estimate of performance: O(n), keskimäärin theta(1)
     // Short rationale for estimate: find on huonoimmassa tapauksesa lineaarinen.
-    // Lisäksi alueet käydäään rekursiivisesti läpi, kunnes ne loppuvat,
-    // joten alueiden haku on myös lineaarinen pysäkin alueiden määrän verran.
-    // Tässä on oletettu, että alueitä ei ole paljon, jolloin haku on vakioaikainen.
+    //                                Lisäksi alueet käydäään rekursiivisesti läpi, kunnes ne loppuvat,
+    //                                joten alueiden haku on myös lineaarinen pysäkin alueiden määrän verran.
+    //                                Tässä on oletettu, että alueitä ei ole paljon, jolloin haku on vakioaikainen.
     std::vector<RegionID> stop_regions(StopID id);
 
     // Non-compulsory operations
@@ -162,9 +161,10 @@ public:
 
     // Estimate of performance: O(n)
     // Short rationale for estimate: Pysäkin hakuun kuluu maksimissaan lineaarinen määrä aikaa, mutta keskimäärin vakioaikaisesti.
-    //  Ajankäyttö riippuu vahvasti siitä, ovatko alueiden tallennetut min ja max koordinaatit voimassa. Ohjelma ei päivitä automaattisesti
+    //  Ajankäyttö riippuu vahvasti siitä, ovatko alueiden tallennetut min ja max koordinaatit voimassa. Muut metodit eivät päivitä automaattisesti
     //  alueen reunakoordinaatteja, kun koordinaatit muuttuvat alueen sisäissä pysäkeissä. Parhaimmassa tapauksessa käydään ainoastaan läpi
-    //  alueen alialueet lineaarisesti. Pahimmassa tapauksessa yhdenkään alueen reunakoordinaatteja ei olla määritetty valmiiksi.
+    //  alueet lineaarisesti(ilman pysäkkejä). Pahimmassa tapauksessa yhdenkään alueen reunakoordinaatteja ei olla määritetty valmiiksi, jolloin
+    //  jokaisen alueen pysäkit joudutaan käymään läpi.
     std::pair<Coord, Coord> region_bounding_box(RegionID id);
 
     // Estimate of performance:
@@ -193,6 +193,7 @@ private:
         std::multimap<Coord,Stop*> stops_;
         std::pair<Coord,Coord> minMax;
         bool minMaxIsValid;
+        unsigned int level_;
     };
 
     struct Stop {
@@ -202,30 +203,32 @@ private:
         Region* region_ = nullptr;
     };
 
-
     std::unordered_map<StopID,std::shared_ptr<Stop>> stopsByID;
     std::unordered_map<RegionID,Region> regionsByID;
     std::multimap<Coord, Stop*> stopCoords; // Järjestyksessä koordinaatin mukaan
-    std::multimap<std::string,Stop*> stopsByName;
+    std::multimap<std::string,Stop*> stopsByName; // Järjestyksessä nimen mukaan
 
     ///
-    /// \brief isSmaller vertailee kahta koordinaattia.
-    ///         Ensin verrataan y-koordinaattia ja jos ne ovat samat, verrataan x-koordinaattia.
-    /// \param c1
-    /// \param c2
-    /// \return (c1 < c2) yllä mainituin ehdoin.
-    ///
-    bool isSmaller(Coord c1,Coord c2);
-
-    ///
-    /// \brief getRegions
-    /// \param regions
-    /// \param overRegionPtr
+    /// \brief getRegions Kerää vectoriin alueet, johon tietty pysäkki kuuluu
+    /// \param regions Kaikki alueet, johon pysäkki kuuluu
+    /// \param overRegionPtr osoitin pysäkin omaan alueeseen
     ///
     void getRegions(std::vector<RegionID>& regions, Region* overRegionPtr);
 
+    ///
+    /// \brief getMinMaxCoords Vertailee min ja max koordinaatteja alueen pysäkkien koordinaatteihin
+    ///         ja muuttaa min ja max koordinaatteja jos löytyy suurempia/pienempiä arvoja.
+    ///         Kutsutaan region_bounding_box funktioista.
+    /// \param min reference to the region_bounding_box return value
+    /// \param max reference to the region_bounding_box return value
+    /// \param regionPtr
+    ///
     void getMinMaxCoords(Coord& min, Coord& max, Region* regionPtr);
 
+    ///
+    /// \brief updateRegionMinMax Päivittää annetun alueen min ja max koordinaatit
+    /// \param regionPtr
+    ///
     void updateRegionMinMax(Region* regionPtr);
 };
 
