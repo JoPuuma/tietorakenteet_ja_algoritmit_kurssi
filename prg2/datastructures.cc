@@ -366,8 +366,12 @@ RegionID Datastructures::stops_common_region(StopID id1, StopID id2)
 
 std::vector<RouteID> Datastructures::all_routes()
 {
-    // Replace this comment and the line below with your implementation
-    return {NO_ROUTE};
+    std::vector<RouteID> routes = {};
+    for(auto& route : routesByID)
+    {
+        routes.push_back(route.first);
+    }
+    return routes;
 }
 
 bool Datastructures::add_route(RouteID id, std::vector<StopID> stops)
@@ -515,4 +519,6 @@ void Datastructures::updateRegionMinMax(Datastructures::Region *regionPtr)
 }
 // ###############################################
 // Phase 1 private operations END
+// ###############################################
+// Phase 2 private operations
 // ###############################################

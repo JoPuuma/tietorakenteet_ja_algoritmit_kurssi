@@ -307,6 +307,7 @@ private:
     std::unordered_map<RouteID,Route> routesByID;
     std::unordered_map<StopID,routeStop> stopEdges;
 
+    // phase 1 private methods
     ///
     /// \brief getRegions Kerää vectoriin alueet, johon tietty pysäkki kuuluu
     /// \param regions Kaikki alueet, johon pysäkki kuuluu
@@ -329,6 +330,9 @@ private:
     /// \param regionPtr
     ///
     void updateRegionMinMax(Region* regionPtr);
+    // phase 1 private methods END
+    // phase 2 private methods
+
 
 };
 
