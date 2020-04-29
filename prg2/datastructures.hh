@@ -288,6 +288,25 @@ private:
     std::multimap<Coord, Stop*> stopCoords; // Järjestyksessä koordinaatin mukaan
     std::multimap<std::string,Stop*> stopsByName; // Järjestyksessä nimen mukaan
 
+    // Phase 2
+
+    // sisältää pysäkiltä lähtevien reittien seuraavat stopID:t
+    struct routeStop{
+        StopID fromID_;
+        Stop* stop_;
+        std::unordered_map<RouteID,StopID> toIDbyRoute_; // eri reittien seuraava pysäkki
+    };
+
+    // kokonainen reitti
+    struct Route{
+        RouteID id_;
+        //std::map<StopID,routeStop*> stops_;
+        std::vector<std::pair<StopID,routeStop*>> stops_; // reitin oikea järjestys
+    };
+
+    std::unordered_map<RouteID,Route> routesByID;
+    std::unordered_map<StopID,routeStop> stopEdges;
+
     ///
     /// \brief getRegions Kerää vectoriin alueet, johon tietty pysäkki kuuluu
     /// \param regions Kaikki alueet, johon pysäkki kuuluu
