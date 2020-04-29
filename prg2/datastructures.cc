@@ -41,6 +41,8 @@ void Datastructures::clear_all()
     regionsByID.clear();
     stopCoords.clear();
     stopsByName.clear();
+    routesByID.clear();
+    stopEdges.clear();
 }
 
 std::vector<StopID> Datastructures::all_stops()
