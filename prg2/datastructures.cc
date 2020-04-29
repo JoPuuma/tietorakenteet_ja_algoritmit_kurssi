@@ -69,6 +69,9 @@ bool Datastructures::add_stop(StopID id, const Name& name, Coord xy)
         Stop* stopPtr = &(*newStop);
         stopCoords.insert(std::pair<Coord, Stop*>(xy,stopPtr));
         stopsByName.insert(std::pair<std::string,Stop*>(name,stopPtr));
+
+        routeStop newRouteStop = {id,stopPtr,{}};
+        stopEdges.insert(std::pair<StopID, routeStop>(id, newRouteStop));
         return true;
     }
 }
@@ -378,8 +381,20 @@ std::vector<RouteID> Datastructures::all_routes()
 
 bool Datastructures::add_route(RouteID id, std::vector<StopID> stops)
 {   
-    // Replace this comment and the line below with your implementation
-    return false;
+    auto it = routesByID.find(id);
+    if(it != routesByID.end()) return false;
+    if((int)stops.size() < 2) return false;
+    std::vector<std::pair<StopID,routeStop*>> routeStops;
+    for(StopID stop : stops)
+    {
+        auto it = stopEdges.find(stop);
+        if(it == stopEdges.end()) return false;
+        it->second.toIDbyRoute_.insert(std::make_pair(id,stop));
+        routeStops.push_back(std::make_pair(stop,&it->second)); // voi tulla häikkää muistipaikkojen kanssa
+    }
+    Route newRoute = {id,routeStops};
+    routesByID.insert(std::make_pair(id,newRoute));
+    return true;
 }
 
 std::vector<std::pair<RouteID, StopID>> Datastructures::routes_from(StopID stopid)

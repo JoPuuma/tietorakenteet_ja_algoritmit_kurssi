@@ -306,6 +306,7 @@ private:
 
     std::unordered_map<RouteID,Route> routesByID;
     std::unordered_map<StopID,routeStop> stopEdges;
+    //const routeStop NO_ROUTESTOP{NO_STOP, nullptr,{}};
 
     // phase 1 private methods
     ///
@@ -335,5 +336,4 @@ private:
 
 
 };
-
 #endif // DATASTRUCTURES_HH
