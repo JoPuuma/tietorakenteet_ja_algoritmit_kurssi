@@ -399,8 +399,15 @@ bool Datastructures::add_route(RouteID id, std::vector<StopID> stops)
 
 std::vector<std::pair<RouteID, StopID>> Datastructures::routes_from(StopID stopid)
 {
-    // Replace this comment and the line below with your implementation
-    return {{NO_ROUTE, NO_STOP}};
+    auto it = stopEdges.find(stopid);
+    if(it == stopEdges.end()) return {{NO_ROUTE,NO_STOP}};
+    std::vector<std::pair<RouteID, StopID>> result = {};
+    for(auto route : it->second.toIDbyRoute_)
+    {
+        result.push_back(route);
+    }
+    if((int)result.size() < 1) return {{NO_ROUTE,NO_STOP}};
+    else return result;
 }
 
 std::vector<StopID> Datastructures::route_stops(RouteID id)
