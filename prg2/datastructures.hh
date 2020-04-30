@@ -300,13 +300,11 @@ private:
     // kokonainen reitti
     struct Route{
         RouteID id_;
-        //std::map<StopID,routeStop*> stops_;
         std::vector<std::pair<StopID,routeStop*>> stops_; // reitin oikea järjestys
     };
 
     std::unordered_map<RouteID,Route> routesByID;
     std::unordered_map<StopID,routeStop> stopEdges;
-    //const routeStop NO_ROUTESTOP{NO_STOP, nullptr,{}};
 
     // phase 1 private methods
     ///

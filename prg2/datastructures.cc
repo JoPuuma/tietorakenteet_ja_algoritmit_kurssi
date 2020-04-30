@@ -435,7 +435,8 @@ std::vector<StopID> Datastructures::route_stops(RouteID id)
 
 void Datastructures::clear_routes()
 {
-    // Replace this comment and the line below with your implementation
+    routesByID.clear();
+    stopEdges.clear();
 }
 
 std::vector<std::tuple<StopID, RouteID, Distance>> Datastructures::journey_any(StopID fromstop, StopID tostop)
