@@ -397,6 +397,12 @@ bool Datastructures::add_route(RouteID id, std::vector<StopID> stops)
         }
         previousID = currentID;
     }
+    // last stop
+    auto lastStopIt = stopEdges.find(previousID);
+    if(lastStopIt == stopEdges.end()) return false;
+    lastStopIt->second.toIDbyRoute_.insert(std::make_pair(id,NO_STOP));
+    routeStops.push_back(std::make_pair(previousID,&lastStopIt->second)); // voi tulla häikkää muistipaikkojen kanssa
+
     Route newRoute = {id,routeStops};
     routesByID.insert(std::make_pair(id,newRoute));
     return true;
@@ -417,8 +423,14 @@ std::vector<std::pair<RouteID, StopID>> Datastructures::routes_from(StopID stopi
 
 std::vector<StopID> Datastructures::route_stops(RouteID id)
 {
-    // Replace this comment and the line below with your implementation
-    return {NO_STOP};
+    auto it = routesByID.find(id);
+    if(it == routesByID.end()) return {NO_STOP};
+    std::vector<StopID> result = {};
+    for(auto stop : it->second.stops_)
+    {
+        result.push_back(stop.first);
+    }
+    return result;
 }
 
 void Datastructures::clear_routes()
