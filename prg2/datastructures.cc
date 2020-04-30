@@ -385,12 +385,17 @@ bool Datastructures::add_route(RouteID id, std::vector<StopID> stops)
     if(it != routesByID.end()) return false;
     if((int)stops.size() < 2) return false;
     std::vector<std::pair<StopID,routeStop*>> routeStops;
-    for(StopID stop : stops)
+    StopID previousID = NO_STOP;
+    for(StopID currentID : stops)
     {
-        auto it = stopEdges.find(stop);
-        if(it == stopEdges.end()) return false;
-        it->second.toIDbyRoute_.insert(std::make_pair(id,stop));
-        routeStops.push_back(std::make_pair(stop,&it->second)); // voi tulla häikkää muistipaikkojen kanssa
+        if(previousID != NO_STOP)
+        {
+            auto it = stopEdges.find(previousID);
+            if(it == stopEdges.end()) return false;
+            it->second.toIDbyRoute_.insert(std::make_pair(id,currentID));
+            routeStops.push_back(std::make_pair(previousID,&it->second)); // voi tulla häikkää muistipaikkojen kanssa
+        }
+        previousID = currentID;
     }
     Route newRoute = {id,routeStops};
     routesByID.insert(std::make_pair(id,newRoute));

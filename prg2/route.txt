@@ -2,6 +2,7 @@ add_stop 12 jo (40,21)
 add_stop 34 ko (78,10)
 add_stop 56 nyt (10,21)
 add_stop 78 mennaa (50,50)
+add_stop 99 eio (15,45)
 add_route A 12 34 56 78
 add_route B 12 78 56
 
