@@ -559,8 +559,17 @@ void Datastructures::updateRegionMinMax(Datastructures::Region *regionPtr)
     regionPtr->minMax = std::make_pair(rmin,rmax);
     regionPtr->minMaxIsValid = true;
 }
+
 // ###############################################
 // Phase 1 private operations END
 // ###############################################
 // Phase 2 private operations
 // ###############################################
+
+Distance Datastructures::getDistance(Coord &c1, Coord &c2)
+{
+    int dy = abs((c2.y - c1.y));
+    int dx = abs((c2.x - c1.x));
+    double distance = sqrt(dx*dx - dy*dy);
+    return (int)floor(distance);
+}

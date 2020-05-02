@@ -331,7 +331,7 @@ private:
     void updateRegionMinMax(Region* regionPtr);
     // phase 1 private methods END
     // phase 2 private methods
-
+    Distance getDistance(Coord& c1, Coord& c2);
 
 };
 #endif // DATASTRUCTURES_HH
