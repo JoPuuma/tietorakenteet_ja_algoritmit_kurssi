@@ -5,6 +5,7 @@
 #include <random>
 #include <cmath>
 #include <stdexcept>
+#include <queue>
 
 std::minstd_rand rand_engine; // Reasonably quick pseudo-random generator
 
@@ -70,7 +71,7 @@ bool Datastructures::add_stop(StopID id, const Name& name, Coord xy)
         stopCoords.insert(std::pair<Coord, Stop*>(xy,stopPtr));
         stopsByName.insert(std::pair<std::string,Stop*>(name,stopPtr));
 
-        routeStop newRouteStop = {id,Colour::white,stopPtr,{}};
+        routeStop newRouteStop = {id,stopPtr};
         stopEdges.insert(std::pair<StopID, routeStop>(id, newRouteStop));
         return true;
     }
@@ -440,18 +441,54 @@ void Datastructures::clear_routes()
 
 std::vector<std::tuple<StopID, RouteID, Distance>> Datastructures::journey_any(StopID fromstop, StopID tostop)
 {
-    // Replace this comment and the line below with your implementation
-    return {{NO_STOP, NO_ROUTE, NO_DISTANCE}};
+    return journey_least_stops(fromstop, tostop);
 }
 
 std::vector<std::tuple<StopID, RouteID, Distance>> Datastructures::journey_least_stops(StopID fromstop, StopID tostop)
 {
+    if(fromstop == tostop) return {{tostop, NO_ROUTE, 0}}; // sama pysäkki
     auto itFrom = stopEdges.find(fromstop);
     auto itTo = stopEdges.find(tostop);
     if(itFrom == stopEdges.end() || itTo == stopEdges.end()) return {{NO_STOP, NO_ROUTE, NO_DISTANCE}};
     std::vector<std::tuple<StopID, RouteID, Distance>> result = {};
-
+    std::queue<routeStop*> Q;
+    routeStop* parent;
+    routeStop* child;
+    bool toStopFound = false;
+    initStops();
+    // start BFS
+    itFrom->second.colour_ = Colour::grey;
+    Q.push(&itFrom->second);
+    while(!Q.empty() && !toStopFound)
+    {
+        parent = Q.front();
+        for(const auto& stop : parent->toIDbyRoute_)
+        {
+            child = &stopEdges[stop.second.first]; // voisi antaa suoraan pointterin ID:n tilalla
+            if(child->colour_ == Colour::white)
+            {
+                child->colour_ = Colour::grey;
+                child->previous_ = &(*parent);
+                child->onRoute_ = &stop.first;
+                child->distFromPrev_ = stop.second.second;
+                if(child->fromID_ == tostop)
+                {
+                    toStopFound = true;
+                    break;
+                }
+                Q.push(child);
+            }
+        }
+        // merkintä mustaksi
+        Q.pop();
+    }
+    if(toStopFound)
+    {
+        getPath(result, fromstop, child, 0);
+    }
+    return result;
 }
+
 
 std::vector<std::tuple<StopID, RouteID, Distance>> Datastructures::journey_with_cycle(StopID fromstop)
 {
@@ -575,3 +612,29 @@ Distance Datastructures::getDistance(Coord &c1, Coord &c2)
     double distance = sqrt(dx*dx + dy*dy);
     return (int)floor(distance);
 }
+
+void Datastructures::initStops()
+{
+    for(auto stop : stopEdges)
+    {
+        stop.second.colour_ = Colour::white;
+        stop.second.previous_ = nullptr;
+        stop.second.onRoute_ = nullptr;
+    }
+}
+
+void Datastructures::getPath(Datastructures::res &result, StopID& from, Datastructures::routeStop *to, Distance dist)
+{
+    dist += to->distFromPrev_;
+    if(to->previous_->fromID_ == from)
+    {
+        result.push_back({from, *to->onRoute_, dist});
+        return;
+    }
+    else
+    {
+        getPath(result, from, &(*to->previous_), dist);
+    }
+}
+
+

@@ -294,10 +294,13 @@ private:
     // sisältää pysäkiltä lähtevien reittien seuraavat stopID:t
     struct routeStop{
         StopID fromID_;
-        Colour colour_;
         Stop* stop_;
-        std::unordered_map<RouteID,std::pair<StopID,Distance>> toIDbyRoute_; // eri reittien seuraava pysäkki
-    };
+        Colour colour_ = Colour::white;
+        routeStop* previous_ = nullptr;
+        const RouteID* onRoute_ = nullptr;
+        Distance distFromPrev_ = NO_DISTANCE;
+        std::unordered_map<RouteID,std::pair<StopID,Distance>> toIDbyRoute_ = {}; // eri reittien seuraava pysäkki
+    }; // StopId -> routeStop pointteri? ei tarvis stopEdgeä käyttää sit
 
     // kokonainen reitti
     struct Route{
@@ -340,6 +343,11 @@ private:
     /// \return Distance
     ///
     Distance getDistance(Coord& c1, Coord& c2);
+
+    void initStops();
+
+    typedef std::vector<std::tuple<StopID, RouteID, Distance>> res;
+    void getPath(res& result, StopID& from, routeStop* to, Distance dist);
 
 };
 #endif // DATASTRUCTURES_HH
