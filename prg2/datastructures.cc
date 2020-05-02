@@ -382,26 +382,25 @@ std::vector<RouteID> Datastructures::all_routes()
 bool Datastructures::add_route(RouteID id, std::vector<StopID> stops)
 {   
     auto it = routesByID.find(id);
-    if(it != routesByID.end()) return false;
-    if((int)stops.size() < 2) return false;
+    if(it != routesByID.end()) return false; // regionID on jo olemassa
+    if((int)stops.size() < 2) return false; // annettuja pysäkkejä on alle 2
     std::vector<std::pair<StopID,routeStop*>> routeStops;
-    StopID previousID = NO_STOP;
-    for(StopID currentID : stops)
+    auto previousID = stops.begin();
+    std::unordered_map<StopID,routeStop>::iterator itPrev = stopEdges.find(*previousID);
+    std::unordered_map<StopID,routeStop>::iterator itCur;
+    for(auto currentID = stops.begin() + 1; currentID != stops.end(); ++currentID)
     {
-        if(previousID != NO_STOP)
-        {
-            auto it = stopEdges.find(previousID);
-            if(it == stopEdges.end()) return false;
-            it->second.toIDbyRoute_.insert(std::make_pair(id,currentID));
-            routeStops.push_back(std::make_pair(previousID,&it->second)); // voi tulla häikkää muistipaikkojen kanssa
-        }
+        itCur = stopEdges.find(*currentID);
+        if(itPrev == stopEdges.end() || itCur == stopEdges.end()) return false;
+        Distance dist = getDistance(itPrev->second.stop_->coord_, itCur->second.stop_->coord_);
+        itPrev->second.toIDbyRoute_.insert(std::make_pair(id,std::make_pair(*currentID,dist)));
+        routeStops.push_back(std::make_pair(*previousID,&itPrev->second));
         previousID = currentID;
+        itPrev = itCur;
     }
     // last stop
-    auto lastStopIt = stopEdges.find(previousID);
-    if(lastStopIt == stopEdges.end()) return false;
-    lastStopIt->second.toIDbyRoute_.insert(std::make_pair(id,NO_STOP));
-    routeStops.push_back(std::make_pair(previousID,&lastStopIt->second)); // voi tulla häikkää muistipaikkojen kanssa
+    itCur->second.toIDbyRoute_.insert(std::make_pair(id,std::make_pair(NO_STOP, NO_DISTANCE)));
+    routeStops.push_back(std::make_pair(*previousID,&itCur->second));
 
     Route newRoute = {id,routeStops};
     routesByID.insert(std::make_pair(id,newRoute));
@@ -415,7 +414,7 @@ std::vector<std::pair<RouteID, StopID>> Datastructures::routes_from(StopID stopi
     std::vector<std::pair<RouteID, StopID>> result = {};
     for(auto route : it->second.toIDbyRoute_)
     {
-        result.push_back(route);
+        result.push_back(std::make_pair(route.first, route.second.first));
     }
     if((int)result.size() < 1) return {{NO_ROUTE,NO_STOP}};
     else return result;
@@ -568,8 +567,8 @@ void Datastructures::updateRegionMinMax(Datastructures::Region *regionPtr)
 
 Distance Datastructures::getDistance(Coord &c1, Coord &c2)
 {
-    int dy = abs((c2.y - c1.y));
-    int dx = abs((c2.x - c1.x));
-    double distance = sqrt(dx*dx - dy*dy);
+    int dy = c2.y - c1.y;
+    int dx = c2.x - c1.x;
+    double distance = sqrt(dx*dx + dy*dy);
     return (int)floor(distance);
 }

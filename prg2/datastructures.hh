@@ -294,7 +294,7 @@ private:
     struct routeStop{
         StopID fromID_;
         Stop* stop_;
-        std::unordered_map<RouteID,StopID> toIDbyRoute_; // eri reittien seuraava pysäkki
+        std::unordered_map<RouteID,std::pair<StopID,Distance>> toIDbyRoute_; // eri reittien seuraava pysäkki
     };
 
     // kokonainen reitti
