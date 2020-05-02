@@ -77,7 +77,8 @@ using Distance = int;
 // Return value for cases where Duration is unknown
 Distance const NO_DISTANCE = NO_VALUE;
 
-
+// type for node status
+enum Colour {white, grey, black};
 
 // This is the class you are supposed to implement
 
@@ -293,6 +294,7 @@ private:
     // sisältää pysäkiltä lähtevien reittien seuraavat stopID:t
     struct routeStop{
         StopID fromID_;
+        Colour colour_;
         Stop* stop_;
         std::unordered_map<RouteID,std::pair<StopID,Distance>> toIDbyRoute_; // eri reittien seuraava pysäkki
     };
@@ -331,6 +333,12 @@ private:
     void updateRegionMinMax(Region* regionPtr);
     // phase 1 private methods END
     // phase 2 private methods
+    ///
+    /// \brief getDistance Laskee annettujen koordinaattien välisen etäisyyden
+    /// \param c1
+    /// \param c2
+    /// \return Distance
+    ///
     Distance getDistance(Coord& c1, Coord& c2);
 
 };

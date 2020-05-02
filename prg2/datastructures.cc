@@ -70,7 +70,7 @@ bool Datastructures::add_stop(StopID id, const Name& name, Coord xy)
         stopCoords.insert(std::pair<Coord, Stop*>(xy,stopPtr));
         stopsByName.insert(std::pair<std::string,Stop*>(name,stopPtr));
 
-        routeStop newRouteStop = {id,stopPtr,{}};
+        routeStop newRouteStop = {id,Colour::white,stopPtr,{}};
         stopEdges.insert(std::pair<StopID, routeStop>(id, newRouteStop));
         return true;
     }
@@ -446,8 +446,11 @@ std::vector<std::tuple<StopID, RouteID, Distance>> Datastructures::journey_any(S
 
 std::vector<std::tuple<StopID, RouteID, Distance>> Datastructures::journey_least_stops(StopID fromstop, StopID tostop)
 {
-    // Replace this comment and the line below with your implementation
-    return {{NO_STOP, NO_ROUTE, NO_DISTANCE}};
+    auto itFrom = stopEdges.find(fromstop);
+    auto itTo = stopEdges.find(tostop);
+    if(itFrom == stopEdges.end() || itTo == stopEdges.end()) return {{NO_STOP, NO_ROUTE, NO_DISTANCE}};
+    std::vector<std::tuple<StopID, RouteID, Distance>> result = {};
+
 }
 
 std::vector<std::tuple<StopID, RouteID, Distance>> Datastructures::journey_with_cycle(StopID fromstop)
