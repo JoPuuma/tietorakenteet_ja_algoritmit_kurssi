@@ -459,6 +459,7 @@ std::vector<std::tuple<StopID, RouteID, Distance>> Datastructures::journey_least
     std::queue<routeStop*> Q;
     routeStop* parent;
     routeStop* child;
+    routeEdge* p; // pointteri jolla iteroidaan lapsipysäkkejä
     bool toStopFound = false;
     initStops();
     // start BFS
@@ -469,15 +470,17 @@ std::vector<std::tuple<StopID, RouteID, Distance>> Datastructures::journey_least
         parent = Q.front();
         for(auto& stop : parent->toIDbyRoute_)
         {
+            if(stop.second.first == NO_STOP) continue;// parent on reitin viimeinen pysäkki
             child = &stopEdges[stop.second.first]; // voisi antaa suoraan pointterin ID:n tilalla
             if(child->colour_ == Colour::white)
             {
+                p = &(*child->routeEdge_);
                 child->colour_ = Colour::grey;
-                child->routeEdge_->fromID_ = &parent->thisID_;
-                child->routeEdge_->fromEdge_ = &(*parent->routeEdge_);
-                child->routeEdge_->toID_ = &child->thisID_;
-                child->routeEdge_->route_ = &stop.first;
-                child->routeEdge_->dist_ = &stop.second.second;
+                p->fromID_ = &parent->thisID_;
+                p->fromEdge_ = &(*parent->routeEdge_);
+                p->toID_ = &child->thisID_;
+                p->route_ = &stop.first;
+                p->dist_ = &stop.second.second;
                 if(child->thisID_ == tostop)
                 {
                     toStopFound = true;
@@ -491,9 +494,8 @@ std::vector<std::tuple<StopID, RouteID, Distance>> Datastructures::journey_least
     }
     if(toStopFound)
     {
-        routeEdge* p = &(*child->routeEdge_);
-        getPath(p);
-        goThroughPath(result);
+        Distance startDistance = 0;
+        getPath(p, result, startDistance);
     }
     return result;
 }
@@ -624,45 +626,70 @@ Distance Datastructures::getDistance(Coord &c1, Coord &c2)
 
 void Datastructures::initStops()
 {
+    routeEdge* p;
     std::unordered_map<StopID,routeStop>::iterator stop;
     for( stop = stopEdges.begin(); stop != stopEdges.end(); ++stop)
     {
+        p = &(*stop->second.routeEdge_);
         stop->second.colour_ = Colour::white;
-        stop->second.routeEdge_->fromID_ = nullptr;
-        stop->second.routeEdge_->route_ = nullptr;
-        stop->second.routeEdge_->dist_ = nullptr;
+        p->fromEdge_ = nullptr;
+        p->fromID_ = nullptr;
+        p->toID_ = nullptr;
+        p->route_ = nullptr;
+        p->dist_ = nullptr;
     }
     path = {};
 }
 
-void Datastructures::goThroughPath(Datastructures::res &result)
-{
-    Distance cumDist = 0;
-    routeEdge* p = path.top();
-    // route start stop
-    result.push_back({*p->fromID_, NO_ROUTE, cumDist});
-    while(!path.empty())
-    {
-        p = path.top();
-        cumDist += *p->dist_;
-        result.push_back({*p->toID_, *p->route_, cumDist});
-        path.pop();
-    }
-}
+//void Datastructures::goThroughPath(Datastructures::res &result)
+//{
+//    Distance cumDist = 0;
+//    routeEdge* p = path.top();
+//    // route start stop
+//    result.push_back({*p->fromID_, NO_ROUTE, cumDist});
+//    while(!path.empty())
+//    {
+//        p = path.top();
+//        cumDist += *p->dist_;
+//        result.push_back({*p->toID_, *p->route_, cumDist});
+//        path.pop();
+//    }
+//}
 
-void Datastructures::getPath(Datastructures::routeEdge *endStop)
+//void Datastructures::getPath(Datastructures::routeEdge *endStop)
+//{
+//    if(endStop->fromID_ == nullptr) // start stop
+//    {
+//        //path.push(&(*endStop));
+//        return;
+//    }
+//    else
+//    {
+//        path.push(&(*endStop));
+//        getPath(endStop->fromEdge_);
+//    }
+//}
+
+void Datastructures::getPath(Datastructures::routeEdge *endStop, Datastructures::res &result, Distance &cumDist)
 {
-    if(endStop->fromID_ == nullptr) // start stop
+    routeEdge* parent = endStop->fromEdge_;
+
+    if(parent->fromID_ == nullptr) // start stop
     {
-        //path.push(&(*endStop));
+        result.push_back({*endStop->fromID_, NO_ROUTE, cumDist});
+        cumDist += *endStop->dist_;
+        result.push_back({*endStop->toID_, *endStop->route_, cumDist});
         return;
     }
     else
     {
-        path.push(&(*endStop));
-        getPath(endStop->fromEdge_);
+        getPath(endStop->fromEdge_, result, cumDist);
+        cumDist += *endStop->dist_;
+        result.push_back({*endStop->toID_, *endStop->route_, cumDist});
     }
 }
+
+
 
 
 

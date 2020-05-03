@@ -361,9 +361,12 @@ private:
     void initStops();
 
     typedef std::vector<std::tuple<StopID, RouteID, Distance>> res;
-    void goThroughPath(res& result);
+//    void goThroughPath(res& result);
 
-    void getPath(routeEdge* endStop);
+//    void getPath(routeEdge* endStop);
+
+    void getPath(Datastructures::routeEdge *endStop, Datastructures::res &result, Distance &cumDist);
+
 
 };
 #endif // DATASTRUCTURES_HH
