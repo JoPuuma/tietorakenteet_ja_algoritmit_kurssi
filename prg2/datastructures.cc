@@ -158,10 +158,12 @@ bool Datastructures::change_stop_name(StopID id, const Name& newname)
     // stops object itself
     stopIt->second->name_ = newname;
     return true;
+    
 }
 
 bool Datastructures::change_stop_coord(StopID id, Coord newcoord)
 {
+    
     auto stopIt = stopsByID.find(id);
 
     if(stopIt == stopsByID.end()) return false;
@@ -615,17 +617,18 @@ Distance Datastructures::getDistance(Coord &c1, Coord &c2)
 
 void Datastructures::initStops()
 {
-    for(auto stop : stopEdges)
+    std::unordered_map<StopID,routeStop>::iterator stop;
+    for( stop = stopEdges.begin(); stop != stopEdges.end(); ++stop)
     {
-        stop.second.colour_ = Colour::white;
-        stop.second.previous_ = nullptr;
-        stop.second.onRoute_ = nullptr;
+        stop->second.colour_ = Colour::white;
+        stop->second.previous_ = nullptr;
+        stop->second.onRoute_ = nullptr;
     }
 }
 
 void Datastructures::getPath(Datastructures::res &result, StopID& from, Datastructures::routeStop *to, Distance dist)
-{
-    dist += to->distFromPrev_;
+{ // kuljettu matka tulee väärin ja pysäkkejä jää yksi vajaaksi
+    int incDist = dist + to->distFromPrev_;
     if(to->previous_->fromID_ == from)
     {
         result.push_back({from, *to->onRoute_, dist});
@@ -633,7 +636,8 @@ void Datastructures::getPath(Datastructures::res &result, StopID& from, Datastru
     }
     else
     {
-        getPath(result, from, &(*to->previous_), dist);
+        getPath(result, from, &(*to->previous_), incDist);
+        result.push_back({to->previous_->fromID_,*to->onRoute_, dist});
     }
 }
 

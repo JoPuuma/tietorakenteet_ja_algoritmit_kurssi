@@ -308,6 +308,7 @@ private:
         std::vector<std::pair<StopID,routeStop*>> stops_; // reitin oikea järjestys
     };
 
+
     std::unordered_map<RouteID,Route> routesByID;
     std::unordered_map<StopID,routeStop> stopEdges;
 

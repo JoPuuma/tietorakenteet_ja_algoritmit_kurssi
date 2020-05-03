@@ -3,9 +3,10 @@ add_stop 34 ko (78,10)
 add_stop 56 nyt (10,21)
 add_stop 78 mennaa (50,50)
 add_stop 10 eka (10,10)
-add_stop 20 toka (10,20)
+add_stop 40 toka (10,40)
 add_stop 99 eio (15,45)
-add_route A 12 34 56 78
-add_route B 12 78 56
-add_route C 10 20
+#add_route A 12 34 56 78
+#add_route B 12 78 56
+#add_route C 10 20
+add_route D 10 12 34 40 56 78
 
