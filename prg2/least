@@ -1,0 +1,2 @@
+read "route.txt"
+journey_least_stops 1 3

@@ -5,7 +5,7 @@
 #include <random>
 #include <cmath>
 #include <stdexcept>
-#include <queue>
+#include <stack>
 
 std::minstd_rand rand_engine; // Reasonably quick pseudo-random generator
 
@@ -44,6 +44,7 @@ void Datastructures::clear_all()
     stopsByName.clear();
     routesByID.clear();
     stopEdges.clear();
+    path = {};
 }
 
 std::vector<StopID> Datastructures::all_stops()
@@ -71,7 +72,8 @@ bool Datastructures::add_stop(StopID id, const Name& name, Coord xy)
         stopCoords.insert(std::pair<Coord, Stop*>(xy,stopPtr));
         stopsByName.insert(std::pair<std::string,Stop*>(name,stopPtr));
 
-        routeStop newRouteStop = {id,stopPtr};
+        std::shared_ptr<routeEdge> newRouteEdge = std::make_shared<routeEdge>();
+        routeStop newRouteStop = {id,stopPtr,newRouteEdge};
         stopEdges.insert(std::pair<StopID, routeStop>(id, newRouteStop));
         return true;
     }
@@ -439,6 +441,7 @@ void Datastructures::clear_routes()
 {
     routesByID.clear();
     stopEdges.clear();
+    path = {};
 }
 
 std::vector<std::tuple<StopID, RouteID, Distance>> Datastructures::journey_any(StopID fromstop, StopID tostop)
@@ -464,16 +467,18 @@ std::vector<std::tuple<StopID, RouteID, Distance>> Datastructures::journey_least
     while(!Q.empty() && !toStopFound)
     {
         parent = Q.front();
-        for(const auto& stop : parent->toIDbyRoute_)
+        for(auto& stop : parent->toIDbyRoute_)
         {
             child = &stopEdges[stop.second.first]; // voisi antaa suoraan pointterin ID:n tilalla
             if(child->colour_ == Colour::white)
             {
                 child->colour_ = Colour::grey;
-                child->previous_ = &(*parent);
-                child->onRoute_ = &stop.first;
-                child->distFromPrev_ = stop.second.second;
-                if(child->fromID_ == tostop)
+                child->routeEdge_->fromID_ = &parent->thisID_;
+                child->routeEdge_->fromEdge_ = &(*parent->routeEdge_);
+                child->routeEdge_->toID_ = &child->thisID_;
+                child->routeEdge_->route_ = &stop.first;
+                child->routeEdge_->dist_ = &stop.second.second;
+                if(child->thisID_ == tostop)
                 {
                     toStopFound = true;
                     break;
@@ -486,7 +491,9 @@ std::vector<std::tuple<StopID, RouteID, Distance>> Datastructures::journey_least
     }
     if(toStopFound)
     {
-        getPath(result, fromstop, child, 0);
+        routeEdge* p = &(*child->routeEdge_);
+        getPath(p);
+        goThroughPath(result);
     }
     return result;
 }
@@ -621,24 +628,41 @@ void Datastructures::initStops()
     for( stop = stopEdges.begin(); stop != stopEdges.end(); ++stop)
     {
         stop->second.colour_ = Colour::white;
-        stop->second.previous_ = nullptr;
-        stop->second.onRoute_ = nullptr;
+        stop->second.routeEdge_->fromID_ = nullptr;
+        stop->second.routeEdge_->route_ = nullptr;
+        stop->second.routeEdge_->dist_ = nullptr;
+    }
+    path = {};
+}
+
+void Datastructures::goThroughPath(Datastructures::res &result)
+{
+    Distance cumDist = 0;
+    routeEdge* p = path.top();
+    // route start stop
+    result.push_back({*p->fromID_, NO_ROUTE, cumDist});
+    while(!path.empty())
+    {
+        p = path.top();
+        cumDist += *p->dist_;
+        result.push_back({*p->toID_, *p->route_, cumDist});
+        path.pop();
     }
 }
 
-void Datastructures::getPath(Datastructures::res &result, StopID& from, Datastructures::routeStop *to, Distance dist)
-{ // kuljettu matka tulee väärin ja pysäkkejä jää yksi vajaaksi
-    int incDist = dist + to->distFromPrev_;
-    if(to->previous_->fromID_ == from)
+void Datastructures::getPath(Datastructures::routeEdge *endStop)
+{
+    if(endStop->fromID_ == nullptr) // start stop
     {
-        result.push_back({from, *to->onRoute_, dist});
+        //path.push(&(*endStop));
         return;
     }
     else
     {
-        getPath(result, from, &(*to->previous_), incDist);
-        result.push_back({to->previous_->fromID_,*to->onRoute_, dist});
+        path.push(&(*endStop));
+        getPath(endStop->fromEdge_);
     }
 }
+
 
 

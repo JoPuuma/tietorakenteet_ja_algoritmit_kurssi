@@ -10,9 +10,12 @@
 #include <limits>
 
 #include <unordered_map>
+#include <unordered_set>
 #include <set>
 #include <map>
 #include <memory> // shared_ptr
+#include <queue>
+#include <stack>
 
 // Types for IDs
 using StopID = long int;
@@ -290,15 +293,24 @@ private:
     std::multimap<std::string,Stop*> stopsByName; // Järjestyksessä nimen mukaan
 
     // Phase 2
+    // kuvaa yksittäisen haun tuloksia tietylle pysäkille, eli muuttuu joka haulla
+    struct routeEdge{
+        routeEdge* fromEdge_ = nullptr;
+        StopID* fromID_ = nullptr;
+        StopID* toID_ = nullptr;
+        const RouteID* route_ = nullptr;
+        Distance* dist_ = nullptr;
+        // Time
+        // jotain muuta mitä tarvii
+    };
 
     // sisältää pysäkiltä lähtevien reittien seuraavat stopID:t
+    // pysyvämpi rakenne kuin routeEdge. Ei muutu hakujen välissä.
     struct routeStop{
-        StopID fromID_;
+        StopID thisID_;
         Stop* stop_;
+        std::shared_ptr<routeEdge> routeEdge_ = nullptr;
         Colour colour_ = Colour::white;
-        routeStop* previous_ = nullptr;
-        const RouteID* onRoute_ = nullptr;
-        Distance distFromPrev_ = NO_DISTANCE;
         std::unordered_map<RouteID,std::pair<StopID,Distance>> toIDbyRoute_ = {}; // eri reittien seuraava pysäkki
     }; // StopId -> routeStop pointteri? ei tarvis stopEdgeä käyttää sit
 
@@ -311,6 +323,7 @@ private:
 
     std::unordered_map<RouteID,Route> routesByID;
     std::unordered_map<StopID,routeStop> stopEdges;
+    std::stack<routeEdge*> path; // etsitty reitti
 
     // phase 1 private methods
     ///
@@ -348,7 +361,9 @@ private:
     void initStops();
 
     typedef std::vector<std::tuple<StopID, RouteID, Distance>> res;
-    void getPath(res& result, StopID& from, routeStop* to, Distance dist);
+    void goThroughPath(res& result);
+
+    void getPath(routeEdge* endStop);
 
 };
 #endif // DATASTRUCTURES_HH

@@ -5,8 +5,13 @@ add_stop 78 mennaa (50,50)
 add_stop 10 eka (10,10)
 add_stop 40 toka (10,40)
 add_stop 99 eio (15,45)
+add_stop 1 y (80,10)
+add_stop 2 ka (80,20)
+add_stop 3 ko (80,30)
 #add_route A 12 34 56 78
 #add_route B 12 78 56
 #add_route C 10 20
 add_route D 10 12 34 40 56 78
+add_route A 12 40 78
+add_route pit 1 2 3
 
