@@ -310,7 +310,7 @@ private:
         StopID thisID_;
         Stop* stop_;
         std::shared_ptr<routeEdge> routeEdge_ = nullptr;
-        Colour colour_ = Colour::white;
+        bool visited_ = false;
         std::unordered_map<RouteID,std::pair<StopID,Distance>> toIDbyRoute_ = {}; // eri reittien seuraava pysäkki
     }; // StopId -> routeStop pointteri? ei tarvis stopEdgeä käyttää sit
 
@@ -324,6 +324,8 @@ private:
     std::unordered_map<RouteID,Route> routesByID;
     std::unordered_map<StopID,routeStop> stopEdges;
     std::stack<routeEdge*> path; // etsitty reitti
+
+    std::shared_ptr<routeEdge> cycleStop_;
 
     // phase 1 private methods
     ///
@@ -365,7 +367,9 @@ private:
 
 //    void getPath(routeEdge* endStop);
 
-    void getPath(Datastructures::routeEdge *endStop, Datastructures::res &result, Distance &cumDist);
+    void getPath(routeEdge *endStop, res &result, Distance &cumDist);
+
+    void DFS_cycle(routeStop *parent, bool& cycleFound, routeEdge* &p);
 
 
 };

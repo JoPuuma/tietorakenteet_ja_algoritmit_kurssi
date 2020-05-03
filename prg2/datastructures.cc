@@ -24,6 +24,7 @@ Type random_in_range(Type start, Type end)
 Datastructures::Datastructures()
 {
     // Replace this comment with your implementation
+    cycleStop_ = std::make_shared<routeEdge>();
 }
 
 Datastructures::~Datastructures()
@@ -44,7 +45,6 @@ void Datastructures::clear_all()
     stopsByName.clear();
     routesByID.clear();
     stopEdges.clear();
-    path = {};
 }
 
 std::vector<StopID> Datastructures::all_stops()
@@ -441,7 +441,6 @@ void Datastructures::clear_routes()
 {
     routesByID.clear();
     stopEdges.clear();
-    path = {};
 }
 
 std::vector<std::tuple<StopID, RouteID, Distance>> Datastructures::journey_any(StopID fromstop, StopID tostop)
@@ -463,7 +462,7 @@ std::vector<std::tuple<StopID, RouteID, Distance>> Datastructures::journey_least
     bool toStopFound = false;
     initStops();
     // start BFS
-    itFrom->second.colour_ = Colour::grey;
+    itFrom->second.visited_ = true;
     Q.push(&itFrom->second);
     while(!Q.empty() && !toStopFound)
     {
@@ -472,10 +471,10 @@ std::vector<std::tuple<StopID, RouteID, Distance>> Datastructures::journey_least
         {
             if(stop.second.first == NO_STOP) continue;// parent on reitin viimeinen pysäkki
             child = &stopEdges[stop.second.first]; // voisi antaa suoraan pointterin ID:n tilalla
-            if(child->colour_ == Colour::white)
+            if(!child->visited_)
             {
                 p = &(*child->routeEdge_);
-                child->colour_ = Colour::grey;
+                child->visited_ = true;
                 p->fromID_ = &parent->thisID_;
                 p->fromEdge_ = &(*parent->routeEdge_);
                 p->toID_ = &child->thisID_;
@@ -503,8 +502,24 @@ std::vector<std::tuple<StopID, RouteID, Distance>> Datastructures::journey_least
 
 std::vector<std::tuple<StopID, RouteID, Distance>> Datastructures::journey_with_cycle(StopID fromstop)
 {
-    // Replace this comment and the line below with your implementation
-    return {{NO_STOP, NO_ROUTE, NO_DISTANCE}};
+    auto itFrom = stopEdges.find(fromstop);
+    if(itFrom == stopEdges.end()) return {{NO_STOP, NO_ROUTE, NO_DISTANCE}};
+    std::vector<std::tuple<StopID, RouteID, Distance>> result = {};
+    routeEdge* p = nullptr;
+    bool cycleFound = false;
+    initStops();
+    // start DFS
+    DFS_cycle(&itFrom->second, cycleFound, p);
+
+    if(cycleFound)
+    {
+        Distance startDistance = 0;
+        getPath(p, result, startDistance);
+        // lisää syklipysäkki loppuun
+        Distance cumSum = std::get<2>(result.back()) + *cycleStop_->dist_;
+        result.push_back({*cycleStop_->toID_, *cycleStop_->route_, cumSum});
+    }
+    return result;
 }
 
 std::vector<std::tuple<StopID, RouteID, Distance>> Datastructures::journey_shortest_distance(StopID fromstop, StopID tostop)
@@ -631,14 +646,18 @@ void Datastructures::initStops()
     for( stop = stopEdges.begin(); stop != stopEdges.end(); ++stop)
     {
         p = &(*stop->second.routeEdge_);
-        stop->second.colour_ = Colour::white;
+        stop->second.visited_ = false;
         p->fromEdge_ = nullptr;
         p->fromID_ = nullptr;
         p->toID_ = nullptr;
         p->route_ = nullptr;
         p->dist_ = nullptr;
     }
-    path = {};
+    cycleStop_->fromEdge_ = nullptr;
+    cycleStop_->fromID_ = nullptr;
+    cycleStop_->toID_ = nullptr;
+    cycleStop_->route_ = nullptr;
+    cycleStop_->dist_ = nullptr;
 }
 
 //void Datastructures::goThroughPath(Datastructures::res &result)
@@ -673,7 +692,6 @@ void Datastructures::initStops()
 void Datastructures::getPath(Datastructures::routeEdge *endStop, Datastructures::res &result, Distance &cumDist)
 {
     routeEdge* parent = endStop->fromEdge_;
-
     if(parent->fromID_ == nullptr) // start stop
     {
         result.push_back({*endStop->fromID_, NO_ROUTE, cumDist});
@@ -683,9 +701,38 @@ void Datastructures::getPath(Datastructures::routeEdge *endStop, Datastructures:
     }
     else
     {
-        getPath(endStop->fromEdge_, result, cumDist);
+        getPath(&(*parent), result, cumDist);
         cumDist += *endStop->dist_;
         result.push_back({*endStop->toID_, *endStop->route_, cumDist});
+    }
+}
+
+void Datastructures::DFS_cycle(Datastructures::routeStop *parent, bool &cycleFound, Datastructures::routeEdge *&p)
+{
+    parent->visited_ = true;
+    for(auto& route : parent->toIDbyRoute_)
+    {
+        if(route.second.first == NO_STOP) continue; // parent on viimeinen reitin pysäkki
+        routeStop* child = &stopEdges[route.second.first];
+        if(!child->visited_)
+        {
+            p = &(*child->routeEdge_);
+            p->fromID_ = &parent->thisID_;
+            p->fromEdge_ = &(*parent->routeEdge_);
+            p->toID_ = &child->thisID_;
+            p->route_ = &route.first;
+            p->dist_ = &route.second.second;
+            DFS_cycle(child, cycleFound, p);
+        }
+        else // silmukka löyty
+        {
+            cycleFound = true;
+            cycleStop_->fromID_ = &parent->thisID_;
+            cycleStop_->toID_ = &child->thisID_;
+            cycleStop_->route_ = &route.first;
+            cycleStop_->dist_ = &route.second.second;
+            return;
+        }
     }
 }
 
