@@ -81,7 +81,7 @@ using Distance = int;
 Distance const NO_DISTANCE = NO_VALUE;
 
 // type for node status
-enum Colour {white, grey, black};
+enum Status {notVisited, Visited, allChildsHandled};
 
 // This is the class you are supposed to implement
 
@@ -310,8 +310,7 @@ private:
         StopID thisID_;
         Stop* stop_;
         std::shared_ptr<routeEdge> routeEdge_ = nullptr;
-        bool visited_ = false;
-        bool allChildsHandled_ = false;
+        Status status_ = notVisited;
         std::unordered_map<RouteID,std::pair<StopID,Distance>> toIDbyRoute_ = {}; // eri reittien seuraava pysäkki
     }; // StopId -> routeStop pointteri? ei tarvis stopEdgeä käyttää sit
 
@@ -368,7 +367,7 @@ private:
 
 //    void getPath(routeEdge* endStop);
 
-    void getPath(routeEdge *endStop, res &result, Distance &cumDist);
+    void getPath(routeEdge *endStop, res &result, Distance &cumDist,const RouteID* nextRoute);
 
     void getCyclePath(routeEdge *endStop, res &result, Distance &cumDist);
 

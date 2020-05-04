@@ -458,29 +458,39 @@ std::vector<std::tuple<StopID, RouteID, Distance>> Datastructures::journey_least
     std::queue<routeStop*> Q;
     routeStop* parent;
     routeStop* child;
-    routeEdge* p; // pointteri jolla iteroidaan lapsipysäkkejä
+    routeEdge* c; // pointteri jolla iteroidaan lapsipysäkkejä
+    routeEdge* p;
     bool toStopFound = false;
     initStops();
     // start BFS
-    itFrom->second.visited_ = true;
-    Q.push(&itFrom->second);
+    parent = &itFrom->second;
+    parent->status_ = Visited;
+    Q.push(parent);
     while(!Q.empty() && !toStopFound)
     {
         parent = Q.front();
         for(auto& stop : parent->toIDbyRoute_)
         {
             if(stop.second.first == NO_STOP) continue;// parent on reitin viimeinen pysäkki
+
+//            if(stop.second.first == NO_STOP) // parent on reitin viimeinen pysäkki
+//            {
+//                parent->routeEdge_->route_ = &stop.first;
+//                continue;
+//            }
             child = &stopEdges[stop.second.first]; // voisi antaa suoraan pointterin ID:n tilalla
-            if(!child->visited_)
+            if(child->status_ == notVisited)
             {
-                p = &(*child->routeEdge_);
-                child->visited_ = true;
-                p->fromID_ = &parent->thisID_;
-                p->fromEdge_ = &(*parent->routeEdge_);
-                p->toID_ = &child->thisID_;
-                p->route_ = &stop.first;
-                p->dist_ = &stop.second.second;
-                if(child->thisID_ == tostop)
+                child->status_ = Visited;
+                c = &(*child->routeEdge_);
+                p = &(*parent->routeEdge_);
+                c->fromID_ = &parent->thisID_;
+                c->fromEdge_ = p;
+                c->toID_ = &child->thisID_;
+                c->dist_ = &stop.second.second;
+                c->route_ = &stop.first;
+                //p->route_ = &stop.first;
+                if(child->thisID_ == tostop) // löydetään kohdepysäkki
                 {
                     toStopFound = true;
                     break;
@@ -494,7 +504,8 @@ std::vector<std::tuple<StopID, RouteID, Distance>> Datastructures::journey_least
     if(toStopFound)
     {
         Distance startDistance = 0;
-        getPath(p, result, startDistance);
+        const RouteID* nextRoute = &NO_ROUTE;
+        getPath(c, result, startDistance, nextRoute);
     }
     return result;
 }
@@ -525,24 +536,33 @@ std::vector<std::tuple<StopID, RouteID, Distance>> Datastructures::journey_with_
 std::vector<std::tuple<StopID, RouteID, Distance>> Datastructures::journey_shortest_distance(StopID fromstop, StopID tostop)
 {
     // Replace this comment and the line below with your implementation
+    (void)fromstop;
+    (void)tostop;
     return {{NO_STOP, NO_ROUTE, NO_DISTANCE}};
 }
 
 bool Datastructures::add_trip(RouteID routeid, std::vector<Time> const& stop_times)
 {
     // Replace this comment and the line below with your implementation
+    (void)stop_times;
+    (void)routeid;
     return false;
 }
 
 std::vector<std::pair<Time, Duration>> Datastructures::route_times_from(RouteID routeid, StopID stopid)
 {
     // Replace this comment and the line below with your implementation
+    (void)routeid;
+    (void)stopid;
     return {{NO_TIME, NO_DURATION}};
 }
 
 std::vector<std::tuple<StopID, RouteID, Time> > Datastructures::journey_earliest_arrival(StopID fromstop, StopID tostop, Time starttime)
 {
     // Replace this comment and the line below with your implementation
+    (void)fromstop;
+    (void)tostop;
+    (void)starttime;
     return {{NO_STOP, NO_ROUTE, NO_TIME}};
 }
 
@@ -646,36 +666,33 @@ void Datastructures::initStops()
     for( stop = stopEdges.begin(); stop != stopEdges.end(); ++stop)
     {
         p = &(*stop->second.routeEdge_);
-        stop->second.visited_ = false;
-        stop->second.allChildsHandled_= false;
+        stop->second.status_ = notVisited;
         p->fromEdge_ = nullptr;
         p->fromID_ = nullptr;
         p->toID_ = nullptr;
         p->route_ = nullptr;
         p->dist_ = nullptr;
     }
-    cycleStop_->fromEdge_ = nullptr;
-    cycleStop_->fromID_ = nullptr;
     cycleStop_->toID_ = nullptr;
-    cycleStop_->route_ = nullptr;
     cycleStop_->dist_ = nullptr;
 }
 
-void Datastructures::getPath(Datastructures::routeEdge *endStop, Datastructures::res &result, Distance &cumDist)
+
+void Datastructures::getPath(Datastructures::routeEdge *endStop, Datastructures::res &result, Distance &cumDist, const RouteID *nextRoute)
 {
     routeEdge* parent = endStop->fromEdge_;
     if(parent->fromID_ == nullptr) // start stop
     {
-        result.push_back({*endStop->fromID_, NO_ROUTE, cumDist});
+        result.push_back({*endStop->fromID_, *endStop->route_, cumDist});
         cumDist += *endStop->dist_;
-        result.push_back({*endStop->toID_, *endStop->route_, cumDist});
+        result.push_back({*endStop->toID_, *nextRoute, cumDist});
         return;
     }
     else
     {
-        getPath(&(*parent), result, cumDist);
+        getPath(&(*parent), result, cumDist, &(*endStop->route_));
         cumDist += *endStop->dist_;
-        result.push_back({*endStop->toID_, *endStop->route_, cumDist});
+        result.push_back({*endStop->toID_, *nextRoute, cumDist});
     }
 }
 
@@ -699,7 +716,7 @@ void Datastructures::getCyclePath(Datastructures::routeEdge *endStop, Datastruct
 
 void Datastructures::DFS_cycle(Datastructures::routeStop *parent, bool &cycleFound, Datastructures::routeEdge *&p)
 {
-    parent->visited_ = true;
+    parent->status_ = Visited;
     for(auto& route : parent->toIDbyRoute_)
     {
         if(route.second.first == NO_STOP) // parent on viimeinen reitin pysäkki
@@ -708,21 +725,19 @@ void Datastructures::DFS_cycle(Datastructures::routeStop *parent, bool &cycleFou
             continue;
         }
         routeStop* child = &stopEdges[route.second.first];
-        if(!child->visited_)
+        if(child->status_ == notVisited)
         {
             p = &(*child->routeEdge_);
             p->fromID_ = &parent->thisID_;
             p->fromEdge_ = &(*parent->routeEdge_);
             p->toID_ = &child->thisID_;
-            //p->route_ = &route.first;
             p->dist_ = &route.second.second;
             parent->routeEdge_->route_ = &route.first;
             DFS_cycle(child, cycleFound, p);
         }
-        else if(!child->allChildsHandled_)
+        else if(child->status_ == Visited)
         {
             cycleFound = true;
-            cycleStop_->fromID_ = &parent->thisID_;
             cycleStop_->toID_ = &child->thisID_;
             cycleStop_->dist_ = &route.second.second;
             parent->routeEdge_->route_ = &route.first;
@@ -730,7 +745,7 @@ void Datastructures::DFS_cycle(Datastructures::routeStop *parent, bool &cycleFou
         }
         if(cycleFound) return;
     }
-    parent->allChildsHandled_ = true; // merkitään mustaksi
+    parent->status_ = allChildsHandled; // merkitään mustaksi
 }
 
 
