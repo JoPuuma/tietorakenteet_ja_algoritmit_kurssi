@@ -647,6 +647,7 @@ void Datastructures::initStops()
     {
         p = &(*stop->second.routeEdge_);
         stop->second.visited_ = false;
+        stop->second.allChildsHandled_= false;
         p->fromEdge_ = nullptr;
         p->fromID_ = nullptr;
         p->toID_ = nullptr;
@@ -701,7 +702,11 @@ void Datastructures::DFS_cycle(Datastructures::routeStop *parent, bool &cycleFou
     parent->visited_ = true;
     for(auto& route : parent->toIDbyRoute_)
     {
-        if(route.second.first == NO_STOP) continue; // parent on viimeinen reitin pysäkki
+        if(route.second.first == NO_STOP) // parent on viimeinen reitin pysäkki
+        {
+            parent->routeEdge_->route_ = &route.first;
+            continue;
+        }
         routeStop* child = &stopEdges[route.second.first];
         if(!child->visited_)
         {
@@ -714,16 +719,18 @@ void Datastructures::DFS_cycle(Datastructures::routeStop *parent, bool &cycleFou
             parent->routeEdge_->route_ = &route.first;
             DFS_cycle(child, cycleFound, p);
         }
-        else // silmukka löyty
+        else if(!child->allChildsHandled_)
         {
             cycleFound = true;
             cycleStop_->fromID_ = &parent->thisID_;
             cycleStop_->toID_ = &child->thisID_;
             cycleStop_->dist_ = &route.second.second;
             parent->routeEdge_->route_ = &route.first;
-            return;
+
         }
+        if(cycleFound) return;
     }
+    parent->allChildsHandled_ = true; // merkitään mustaksi
 }
 
 

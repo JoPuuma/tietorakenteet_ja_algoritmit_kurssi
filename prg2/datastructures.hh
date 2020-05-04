@@ -311,6 +311,7 @@ private:
         Stop* stop_;
         std::shared_ptr<routeEdge> routeEdge_ = nullptr;
         bool visited_ = false;
+        bool allChildsHandled_ = false;
         std::unordered_map<RouteID,std::pair<StopID,Distance>> toIDbyRoute_ = {}; // eri reittien seuraava pysäkki
     }; // StopId -> routeStop pointteri? ei tarvis stopEdgeä käyttää sit
 
