@@ -317,8 +317,6 @@ private:
         StopID* toID_ = nullptr;
         const RouteID* route_ = nullptr;
         Distance* dist_ = nullptr;
-        // Time
-        // jotain muuta mitä tarvii
     };
 
     // sisältää pysäkiltä lähtevien reittien seuraavat stopID:t
@@ -329,7 +327,7 @@ private:
         std::shared_ptr<routeEdge> routeEdge_ = nullptr;
         Status status_ = notVisited;
         std::unordered_map<RouteID,std::pair<StopID,Distance>> toIDbyRoute_ = {}; // eri reittien seuraava pysäkki
-    }; // StopId -> routeStop pointteri? ei tarvis stopEdgeä käyttää sit
+    };
 
     // kokonainen reitti
     struct Route{
@@ -340,7 +338,6 @@ private:
 
     std::unordered_map<RouteID,Route> routesByID;
     std::unordered_map<StopID,routeStop> stopEdges;
-    //std::stack<routeEdge*> path; // etsitty reitti
 
     std::shared_ptr<routeEdge> cycleStop_;
 
@@ -377,17 +374,36 @@ private:
     ///
     Distance getDistance(Coord& c1, Coord& c2);
 
+    ///
+    /// \brief initStops
+    ///
     void initStops();
 
     typedef std::vector<std::tuple<StopID, RouteID, Distance>> res;
-//    void goThroughPath(res& result);
 
-//    void getPath(routeEdge* endStop);
-
+    ///
+    /// \brief getPath
+    /// \param endStop
+    /// \param result
+    /// \param cumDist
+    /// \param nextRoute
+    ///
     void getPath(routeEdge *endStop, res &result, Distance &cumDist,const RouteID* nextRoute);
 
+    ///
+    /// \brief getCyclePath
+    /// \param endStop
+    /// \param result
+    /// \param cumDist
+    ///
     void getCyclePath(routeEdge *endStop, res &result, Distance &cumDist);
 
+    ///
+    /// \brief DFS_cycle
+    /// \param parent
+    /// \param cycleFound
+    /// \param p
+    ///
     void DFS_cycle(routeStop *parent, bool& cycleFound, routeEdge* &p);
 
 
