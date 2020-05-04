@@ -514,10 +514,10 @@ std::vector<std::tuple<StopID, RouteID, Distance>> Datastructures::journey_with_
     if(cycleFound)
     {
         Distance startDistance = 0;
-        getPath(p, result, startDistance);
+        getCyclePath(p, result, startDistance);
         // lisää syklipysäkki loppuun
         Distance cumSum = std::get<2>(result.back()) + *cycleStop_->dist_;
-        result.push_back({*cycleStop_->toID_, *cycleStop_->route_, cumSum});
+        result.push_back({*cycleStop_->toID_, NO_ROUTE, cumSum});
     }
     return result;
 }
@@ -660,35 +660,6 @@ void Datastructures::initStops()
     cycleStop_->dist_ = nullptr;
 }
 
-//void Datastructures::goThroughPath(Datastructures::res &result)
-//{
-//    Distance cumDist = 0;
-//    routeEdge* p = path.top();
-//    // route start stop
-//    result.push_back({*p->fromID_, NO_ROUTE, cumDist});
-//    while(!path.empty())
-//    {
-//        p = path.top();
-//        cumDist += *p->dist_;
-//        result.push_back({*p->toID_, *p->route_, cumDist});
-//        path.pop();
-//    }
-//}
-
-//void Datastructures::getPath(Datastructures::routeEdge *endStop)
-//{
-//    if(endStop->fromID_ == nullptr) // start stop
-//    {
-//        //path.push(&(*endStop));
-//        return;
-//    }
-//    else
-//    {
-//        path.push(&(*endStop));
-//        getPath(endStop->fromEdge_);
-//    }
-//}
-
 void Datastructures::getPath(Datastructures::routeEdge *endStop, Datastructures::res &result, Distance &cumDist)
 {
     routeEdge* parent = endStop->fromEdge_;
@@ -707,6 +678,24 @@ void Datastructures::getPath(Datastructures::routeEdge *endStop, Datastructures:
     }
 }
 
+void Datastructures::getCyclePath(Datastructures::routeEdge *endStop, Datastructures::res &result, Distance &cumDist)
+{
+    routeEdge* parent = endStop->fromEdge_;
+    if(parent->fromID_ == nullptr) // start stop
+    {
+        result.push_back({*endStop->fromID_, *parent->route_, cumDist});
+        cumDist += *endStop->dist_;
+        result.push_back({*endStop->toID_, *endStop->route_, cumDist});
+        return;
+    }
+    else
+    {
+        getCyclePath(&(*parent), result, cumDist);
+        cumDist += *endStop->dist_;
+        result.push_back({*endStop->toID_, *endStop->route_, cumDist});
+    }
+}
+
 void Datastructures::DFS_cycle(Datastructures::routeStop *parent, bool &cycleFound, Datastructures::routeEdge *&p)
 {
     parent->visited_ = true;
@@ -720,8 +709,9 @@ void Datastructures::DFS_cycle(Datastructures::routeStop *parent, bool &cycleFou
             p->fromID_ = &parent->thisID_;
             p->fromEdge_ = &(*parent->routeEdge_);
             p->toID_ = &child->thisID_;
-            p->route_ = &route.first;
+            //p->route_ = &route.first;
             p->dist_ = &route.second.second;
+            parent->routeEdge_->route_ = &route.first;
             DFS_cycle(child, cycleFound, p);
         }
         else // silmukka löyty
@@ -729,8 +719,8 @@ void Datastructures::DFS_cycle(Datastructures::routeStop *parent, bool &cycleFou
             cycleFound = true;
             cycleStop_->fromID_ = &parent->thisID_;
             cycleStop_->toID_ = &child->thisID_;
-            cycleStop_->route_ = &route.first;
             cycleStop_->dist_ = &route.second.second;
+            parent->routeEdge_->route_ = &route.first;
             return;
         }
     }

@@ -369,6 +369,8 @@ private:
 
     void getPath(routeEdge *endStop, res &result, Distance &cumDist);
 
+    void getCyclePath(routeEdge *endStop, res &result, Distance &cumDist);
+
     void DFS_cycle(routeStop *parent, bool& cycleFound, routeEdge* &p);
 
 
