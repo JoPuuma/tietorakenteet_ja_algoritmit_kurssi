@@ -213,38 +213,55 @@ public:
     // Phase 2 operations
     // ###############################################
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: theta(n)
+    // Short rationale for estimate: Käydään läpi kaikki reitit ja kopioidaan ne.
     std::vector<RouteID> all_routes();
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n²) keskimäärin theta(n)
+    // Short rationale for estimate: Useampi find kutsu unordered mapille, jolloin etsintä on pahimmillaan
+    //                               lineaarinen, mutta useimmiten vakio. insert kutsu kuluttaa pahimmillaan
+    //                               lineaarisen ajan, mutta useimmin vakioajan. Koska molempia kutsuja on
+    //                               for-loopin sisällä, tehokkuus on pahimmillaan n². Muut operaatiot vakioaikaisia.
     bool add_route(RouteID id, std::vector<StopID> stops);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: theta(n)
+    // Short rationale for estimate: Find-kutsu pahimmillaan lineaarinen, mutta useimmin vakio.
+    //                               Yksi for-loop, jossa kopioidaan alkiot. pahimmillaan siis n+m.
     std::vector<std::pair<RouteID, StopID>> routes_from(StopID stopid);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: theta(n)
+    // Short rationale for estimate: Find-kutsu pahimmillaan lineaarinen, mutta useimmin vakio.
+    //                               Yksi for-loop, jossa kopioidaan alkiot. pahimmillaan siis n+m.
     std::vector<StopID> route_stops(RouteID id);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: theta(n)
+    // Short rationale for estimate: Kaksi clear kutsua kuluttaa n+m verran aikaa.
     void clear_routes();
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n²)
+    // Short rationale for estimate: kutsuu journey_least_stops-metodia, joten tällä on sama tehokkuus.
     std::vector<std::tuple<StopID, RouteID, Distance>> journey_any(StopID fromstop, StopID tostop);
 
 //    // Non-compulsory operations
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n²)
+    // Short rationale for estimate: Find-metodi pahimmillaan lineaarinen, mutta useimmin vakio.
+    //                               Solmujen ja kaarien alustus on lineaarinen.
+    //                               while-silmukka suoritetaan korkeintaan solmujen määrän verran, mutta silmukka
+    //                               lopetetaan välittömästi, kun etsitty pysäkki löytyy, eli O(n).
+    //                               While-silmukan sisällä for käytdään korkeintaan kaarien verran läpi, eli O(n).
+    //                               Tällöinkin suoritus päättyy, kun oikea pysäkki löytyy.
+    //                               Löydetyn polun läpikäynti ja tietojen kopiointi on yhdessä lineaarinen operaatio.
+    //                               Muut operaatiot ovat vakioaikaisia.
     std::vector<std::tuple<StopID, RouteID, Distance>> journey_least_stops(StopID fromstop, StopID tostop);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: O(n²)
+    // Short rationale for estimate: Find-metodi pahimmillaan lineaarinen, mutta useimmin vakio.
+    //                               Solmujen ja kaarien alustus on lineaarinen.
+    //                               DFS on toteutettu rekursiivisesti. Kutsu tehdään korkeintaan kerran jokaiselle solmulle
+    //                               Ajo lopetetaan välittömästi, kun sykli löytyy, eli tehokkuus O(n).
+    //                               Jokaisen kutsun yhteydessä käydään solmuja läpi korkeintaan O(n) verran.
+    //                               Muut operaatiot ovat vakioaikaisia.
     std::vector<std::tuple<StopID, RouteID, Distance>> journey_with_cycle(StopID fromstop);
 
     // Estimate of performance:
@@ -323,7 +340,7 @@ private:
 
     std::unordered_map<RouteID,Route> routesByID;
     std::unordered_map<StopID,routeStop> stopEdges;
-    std::stack<routeEdge*> path; // etsitty reitti
+    //std::stack<routeEdge*> path; // etsitty reitti
 
     std::shared_ptr<routeEdge> cycleStop_;
 

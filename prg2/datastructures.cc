@@ -473,11 +473,6 @@ std::vector<std::tuple<StopID, RouteID, Distance>> Datastructures::journey_least
         {
             if(stop.second.first == NO_STOP) continue;// parent on reitin viimeinen pysäkki
 
-//            if(stop.second.first == NO_STOP) // parent on reitin viimeinen pysäkki
-//            {
-//                parent->routeEdge_->route_ = &stop.first;
-//                continue;
-//            }
             child = &stopEdges[stop.second.first]; // voisi antaa suoraan pointterin ID:n tilalla
             if(child->status_ == notVisited)
             {
@@ -489,7 +484,6 @@ std::vector<std::tuple<StopID, RouteID, Distance>> Datastructures::journey_least
                 c->toID_ = &child->thisID_;
                 c->dist_ = &stop.second.second;
                 c->route_ = &stop.first;
-                //p->route_ = &stop.first;
                 if(child->thisID_ == tostop) // löydetään kohdepysäkki
                 {
                     toStopFound = true;
