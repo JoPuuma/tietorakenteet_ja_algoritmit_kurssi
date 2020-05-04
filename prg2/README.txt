@@ -9,7 +9,7 @@ Pysäkkien välisiä reittejä kuvataan graafilla.Ohjelmassa on luotuna unordere
 Pysäkeille ja niiden välisille kaarille on luotuna omat rakenteensa, vaikka ne sisältävätkin osin samaa dataa. Kaarien(routeEdge) data muuttuu jokaisella hakukerralla, mutta solmujen (routeStop) data pysyy melko staattisena. Tällöin dataa ei tarvitse liikutella paljon vaan käyttää osoittimia oikeisiin pakíkkoihin. 
 HUOM! Koodissa käytetyt parent-child rakenteet kuvaavat mistä-mihin -suhdetta.
 
-Ei-pakollisista metodeista ohjelmaan on toteutettu journey_least_stops, journey_with_cycle
+Ei-pakollisista metodeista ohjelmaan on toteutettu journey_least_stops, journey_with_cycle ja add_trip
 
 journey_least_stops on toteutettu BFS hakuna, jolloin lyhin reitti löytyy verrattaen nopeasti.
 journey_with_cycle on toteutettu DFS hakuna, jolloin mahdollinen sykli on mahdollsita löytää nopeasti.

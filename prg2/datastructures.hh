@@ -268,8 +268,9 @@ public:
     // Short rationale for estimate:
     std::vector<std::tuple<StopID, RouteID, Distance>> journey_shortest_distance(StopID fromstop, StopID tostop);
 
-    // Estimate of performance:
-    // Short rationale for estimate:
+    // Estimate of performance: theta(n)
+    // Short rationale for estimate: Find-metodi pahimmillaan lineaarinen, mutta useimmin vakio. For-loopissa
+    //                               käydään kaikki pysäkit lineaarisesti läpi.
     bool add_trip(RouteID routeid, const std::vector<Time> &stop_times);
 
     // Estimate of performance:
@@ -327,6 +328,7 @@ private:
         std::shared_ptr<routeEdge> routeEdge_ = nullptr;
         Status status_ = notVisited;
         std::unordered_map<RouteID,std::pair<StopID,Distance>> toIDbyRoute_ = {}; // eri reittien seuraava pysäkki
+        std::unordered_map<RouteID,Time> times_ = {};
     };
 
     // kokonainen reitti

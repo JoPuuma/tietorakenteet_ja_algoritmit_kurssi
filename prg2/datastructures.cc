@@ -537,10 +537,16 @@ std::vector<std::tuple<StopID, RouteID, Distance>> Datastructures::journey_short
 
 bool Datastructures::add_trip(RouteID routeid, std::vector<Time> const& stop_times)
 {
-    // Replace this comment and the line below with your implementation
-    (void)stop_times;
-    (void)routeid;
-    return false;
+    auto routeIt = routesByID.find(routeid);
+    if(routeIt == routesByID.end()) return false;
+    std::vector<std::pair<StopID,routeStop*>> stops = routeIt->second.stops_;
+    routeStop* current;
+    for(int i = 0; i < (int)stops.size() ; ++i)
+    {
+        current = stops[i].second;
+        current->times_.insert(std::make_pair(routeid,stop_times[i]));
+    }
+    return true;
 }
 
 std::vector<std::pair<Time, Duration>> Datastructures::route_times_from(RouteID routeid, StopID stopid)
